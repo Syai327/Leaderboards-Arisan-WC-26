@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arisan WC 2026 — Leaderboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0f1e; color: #e8eaf0; min-height: 100vh; }
+
+  /* Header */
+  .header { background: #0d1528; border-bottom: 1px solid #1e2d4a; padding: 18px 24px; display: flex; align-items: center; gap: 14px; }
+  .header-badge { background: #1a3560; border: 1px solid #2a5090; border-radius: 8px; padding: 8px 14px; font-size: 22px; }
+  .header h1 { font-size: 18px; font-weight: 600; color: #ffffff; }
+  .header p { font-size: 13px; color: #6b7fa3; margin-top: 2px; }
+
+  /* Layout */
+  .main { display: grid; grid-template-columns: 340px 1fr; gap: 0; min-height: calc(100vh - 65px); }
+
+  /* Sidebar */
+  .sidebar { background: #0d1528; border-right: 1px solid #1e2d4a; padding: 0; overflow-y: auto; }
+  .sidebar-section { padding: 16px 20px; border-bottom: 1px solid #1a2540; }
+  .sidebar-section h2 { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: #4a6080; text-transform: uppercase; margin-bottom: 12px; }
+
+  /* Score input */
+  .match-item { margin-bottom: 6px; }
+  .match-header { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; cursor: pointer; padding: 6px 8px; border-radius: 6px; transition: background .15s; }
+  .match-header:hover { background: #141f38; }
+  .match-num { font-size: 10px; color: #3d5278; font-weight: 600; width: 22px; flex-shrink: 0; }
+  .match-teams { font-size: 12px; color: #8090b0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .match-status { font-size: 10px; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+  .status-done { background: #0d2d1a; color: #3dbd6a; }
+  .status-pending { background: #1a1e2a; color: #4a5270; }
+
+  .score-row { display: flex; align-items: center; gap: 6px; padding: 4px 8px 8px 38px; }
+  .score-row input { width: 42px; background: #111a30; border: 1px solid #1e2d4a; border-radius: 5px; color: #e8eaf0; font-size: 14px; font-weight: 600; text-align: center; padding: 5px 2px; }
+  .score-row input:focus { outline: none; border-color: #2a72d8; background: #0f1f3a; }
+  .score-row input::placeholder { color: #2a3a55; }
+  .score-sep { color: #3d5278; font-weight: 700; font-size: 14px; }
+  .score-label { font-size: 11px; color: #3d5278; }
+
+  /* Date group */
+  .date-group { margin-bottom: 2px; }
+  .date-label { font-size: 10px; color: #2a4060; font-weight: 600; padding: 8px 8px 4px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* Chart area */
+  .chart-area { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+  .chart-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .chart-title { font-size: 15px; font-weight: 600; color: #c8d4f0; }
+  .chart-sub { font-size: 12px; color: #4a6080; margin-top: 2px; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .stat-card { background: #0d1528; border: 1px solid #1e2d4a; border-radius: 8px; padding: 12px 14px; }
+  .stat-label { font-size: 10px; color: #4a6080; text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat-val { font-size: 20px; font-weight: 700; color: #ffffff; margin-top: 3px; }
+  .stat-sub { font-size: 11px; color: #4a8060; margin-top: 1px; }
+
+  .chart-wrap { background: #0d1528; border: 1px solid #1e2d4a; border-radius: 10px; padding: 16px; position: relative; }
+  .chart-canvas-wrap { position: relative; height: 380px; }
+
+  /* Legend */
+  .legend-grid { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+  .leg { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #6b7fa3; cursor: pointer; padding: 3px 0; }
+  .leg-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .leg.hidden { opacity: 0.3; }
+  .leg-score { font-weight: 600; color: #8090b0; margin-left: 2px; }
+
+  /* Leaderboard */
+  .lb-list { display: flex; flex-direction: column; gap: 4px; }
+  .lb-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 6px; background: #0d1528; border: 1px solid #1a2540; }
+  .lb-rank { font-size: 11px; font-weight: 700; width: 20px; text-align: center; color: #4a6080; }
+  .lb-rank.gold { color: #f5c842; }
+  .lb-rank.silver { color: #a0b0c8; }
+  .lb-rank.bronze { color: #c87840; }
+  .lb-name { flex: 1; font-size: 12px; color: #c8d4f0; }
+  .lb-bar-wrap { width: 90px; background: #111a30; border-radius: 3px; height: 5px; }
+  .lb-bar { height: 5px; border-radius: 3px; }
+  .lb-pts { font-size: 12px; font-weight: 700; color: #ffffff; width: 22px; text-align: right; }
+
+  .filter-row { display: flex; gap: 6px; }
+  .filter-btn { background: #111a30; border: 1px solid #1e2d4a; border-radius: 5px; color: #6b7fa3; font-size: 11px; padding: 4px 10px; cursor: pointer; }
+  .filter-btn.active { background: #1a3560; border-color: #2a5090; color: #7ab0f0; }
+
+  @media (max-width: 768px) {
+    .main { grid-template-columns: 1fr; }
+    .sidebar { max-height: 45vh; border-right: none; border-bottom: 1px solid #1e2d4a; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">⚽</div>
+  <div>
+    <h1>Arisan WC 2026 — Leaderboard</h1>
+    <p>Update skor di kiri → grafik langsung update otomatis</p>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- SIDEBAR: Score Input -->
+  <div class="sidebar" id="sidebar"></div>
+
+  <!-- CHART AREA -->
+  <div class="chart-area">
+    <div>
+      <div class="chart-top">
+        <div>
+          <div class="chart-title">Perjalanan Poin per Match</div>
+          <div class="chart-sub" id="chart-sub">— match selesai</div>
+        </div>
+        <div class="filter-row">
+          <button class="filter-btn active" onclick="setFilter('all',this)">Semua</button>
+          <button class="filter-btn" onclick="setFilter('top5',this)">Top 5</button>
+          <button class="filter-btn" onclick="setFilter('bottom5',this)">Bottom 5</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-row" id="stats-row"></div>
+
+    <div class="chart-wrap">
+      <div class="chart-canvas-wrap">
+        <canvas id="myChart" role="img" aria-label="Grafik kumulatif poin Arisan WC 2026"></canvas>
+      </div>
+    </div>
+
+    <div>
+      <div class="sidebar-section" style="padding: 0 0 12px 0; border: none;">
+        <h2 style="margin-bottom:10px;">Legend — klik untuk hide/show</h2>
+        <div class="legend-grid" id="legend"></div>
+      </div>
+    </div>
+
+    <div>
+      <div style="margin-bottom:10px; display:flex; align-items:center; justify-content:space-between;">
+        <span style="font-size:11px; font-weight:600; letter-spacing:.08em; color:#4a6080; text-transform:uppercase;">Klasemen saat ini</span>
+      </div>
+      <div class="lb-list" id="lb-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MATCHES = [
+  {no:1,date:"11 Juni",t1:"Mexico",t2:"South Africa"},
+  {no:2,date:"11 Juni",t1:"Korea Republic",t2:"Czechia"},
+  {no:3,date:"12 Juni",t1:"Canada",t2:"Bosnia-Herz."},
+  {no:4,date:"12 Juni",t1:"USA",t2:"Paraguay"},
+  {no:5,date:"13 Juni",t1:"Haiti",t2:"Scotland"},
+  {no:6,date:"13 Juni",t1:"Australia",t2:"Türkiye"},
+  {no:7,date:"13 Juni",t1:"Brazil",t2:"Morocco"},
+  {no:8,date:"13 Juni",t1:"Qatar",t2:"Switzerland"},
+  {no:9,date:"14 Juni",t1:"Côte d'Ivoire",t2:"Ecuador"},
+  {no:10,date:"14 Juni",t1:"Germany",t2:"Curaçao"},
+  {no:11,date:"14 Juni",t1:"Netherlands",t2:"Japan"},
+  {no:12,date:"14 Juni",t1:"Sweden",t2:"Tunisia"},
+  {no:13,date:"15 Juni",t1:"Saudi Arabia",t2:"Uruguay"},
+  {no:14,date:"15 Juni",t1:"Spain",t2:"Cape Verde"},
+  {no:15,date:"15 Juni",t1:"IR Iran",t2:"New Zealand"},
+  {no:16,date:"15 Juni",t1:"Belgium",t2:"Egypt"},
+  {no:17,date:"16 Juni",t1:"France",t2:"Senegal"},
+  {no:18,date:"16 Juni",t1:"Iraq",t2:"Norway"},
+  {no:19,date:"16 Juni",t1:"Argentina",t2:"Algeria"},
+  {no:20,date:"16 Juni",t1:"Austria",t2:"Jordan"},
+  {no:21,date:"17 Juni",t1:"Ghana",t2:"Panama"},
+  {no:22,date:"17 Juni",t1:"England",t2:"Croatia"},
+  {no:23,date:"17 Juni",t1:"Portugal",t2:"Congo DR"},
+  {no:24,date:"17 Juni",t1:"Uzbekistan",t2:"Colombia"},
+  {no:25,date:"18 Juni",t1:"Czechia",t2:"South Africa"},
+  {no:26,date:"18 Juni",t1:"Switzerland",t2:"Bosnia-Herz."},
+  {no:27,date:"18 Juni",t1:"Canada",t2:"Qatar"},
+  {no:28,date:"18 Juni",t1:"Mexico",t2:"Korea Republic"},
+  {no:29,date:"19 Juni",t1:"Brazil",t2:"Haiti"},
+  {no:30,date:"19 Juni",t1:"Scotland",t2:"Morocco"},
+  {no:31,date:"19 Juni",t1:"USA",t2:"Australia"},
+  {no:32,date:"19 Juni",t1:"Türkiye",t2:"Paraguay"},
+  {no:33,date:"20 Juni",t1:"Germany",t2:"Ivory Coast"},
+  {no:34,date:"20 Juni",t1:"Ecuador",t2:"Curaçao"},
+  {no:35,date:"20 Juni",t1:"Netherlands",t2:"Sweden"},
+  {no:36,date:"20 Juni",t1:"Tunisia",t2:"Japan"},
+  {no:37,date:"21 Juni",t1:"Belgium",t2:"Iran"},
+  {no:38,date:"21 Juni",t1:"New Zealand",t2:"Egypt"},
+  {no:39,date:"21 Juni",t1:"Spain",t2:"Saudi Arabia"},
+  {no:40,date:"21 Juni",t1:"Uruguay",t2:"Cape Verde"},
+  {no:41,date:"22 Juni",t1:"France",t2:"Iraq"},
+  {no:42,date:"22 Juni",t1:"Norway",t2:"Senegal"},
+  {no:43,date:"22 Juni",t1:"Argentina",t2:"Austria"},
+  {no:44,date:"22 Juni",t1:"Jordan",t2:"Algeria"},
+  {no:45,date:"23 Juni",t1:"Portugal",t2:"Uzbekistan"},
+  {no:46,date:"23 Juni",t1:"Colombia",t2:"Congo DR"},
+  {no:47,date:"23 Juni",t1:"England",t2:"Ghana"},
+  {no:48,date:"23 Juni",t1:"Panama",t2:"Croatia"},
+  {no:49,date:"24 Juni",t1:"Czechia",t2:"Mexico"},
+  {no:50,date:"24 Juni",t1:"South Africa",t2:"South Korea"},
+  {no:51,date:"24 Juni",t1:"Switzerland",t2:"Canada"},
+  {no:52,date:"24 Juni",t1:"Bosnia & Herz.",t2:"Qatar"},
+  {no:53,date:"25 Juni",t1:"Scotland",t2:"Brazil"},
+  {no:54,date:"25 Juni",t1:"Morocco",t2:"Haiti"},
+  {no:55,date:"25 Juni",t1:"Türkiye",t2:"USA"},
+  {no:56,date:"25 Juni",t1:"Paraguay",t2:"Australia"},
+  {no:57,date:"26 Juni",t1:"Ecuador",t2:"Germany"},
+  {no:58,date:"26 Juni",t1:"Curaçao",t2:"Ivory Coast"},
+  {no:59,date:"26 Juni",t1:"Tunisia",t2:"Netherlands"},
+  {no:60,date:"26 Juni",t1:"Japan",t2:"Sweden"},
+  {no:61,date:"27 Juni",t1:"New Zealand",t2:"Belgium"},
+  {no:62,date:"27 Juni",t1:"Egypt",t2:"Iran"},
+  {no:63,date:"27 Juni",t1:"Uruguay",t2:"Spain"},
+  {no:64,date:"27 Juni",t1:"Cape Verde",t2:"Saudi Arabia"},
+  {no:65,date:"28 Juni",t1:"Norway",t2:"France"},
+  {no:66,date:"28 Juni",t1:"Senegal",t2:"Iraq"},
+  {no:67,date:"28 Juni",t1:"Jordan",t2:"Argentina"},
+  {no:68,date:"28 Juni",t1:"Algeria",t2:"Austria"},
+  {no:69,date:"29 Juni",t1:"Colombia",t2:"Portugal"},
+  {no:70,date:"29 Juni",t1:"Congo DR",t2:"Uzbekistan"},
+  {no:71,date:"29 Juni",t1:"Panama",t2:"England"},
+  {no:72,date:"29 Juni",t1:"Croatia",t2:"Ghana"}
+];
+
+// picks[player][matchIndex] = 1 jika pemain pick benar, 0 jika salah
+// Data ini sudah fix dari file Excel — hanya skor yang perlu diupdate
+const PICKS = {
+  "Istie":      [0,1,1,1,1,0,1,1,0,1,1,1,1,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Enrico":     [0,1,0,1,1,0,0,1,0,1,1,1,0,0,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Latif":      [1,1,0,1,1,0,1,0,0,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Bayu":       [1,0,0,1,1,1,0,0,1,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Charlie":    [1,1,0,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Diana":      [1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Tri Wardoyo":[0,0,0,1,1,0,0,0,1,1,1,1,0,0,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Vando":      [1,1,1,0,1,0,1,0,1,1,0,1,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Anton":      [1,0,1,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Chris":      [1,0,0,1,1,0,0,0,1,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Eja":        [0,1,1,0,1,0,0,0,0,1,0,1,1,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Pak Yo":     [1,0,1,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Putu":       [1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Raihan":     [0,1,0,1,1,1,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Rajib":      [1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Rustam":     [1,0,0,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Sidra":      [1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Tika":       [1,0,0,1,1,1,0,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Dwi":        [1,0,1,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Gilang":     [1,1,0,0,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Mario":      [1,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Nike":       [1,1,1,0,1,1,0,0,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Robi":       [1,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Bryan":      [0,1,0,1,1,0,0,0,0,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Ikiw":       [0,0,0,1,0,1,0,1,0,1,0,0,1,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+};
+
+const PLAYER_NAMES = Object.keys(PICKS);
+
+// Skor setiap match: [skor_tim1, skor_tim2] atau null kalau belum
+// Diisi dari input user
+let scores = new Array(72).fill(null);
+
+// Pre-fill skor match 1-20 yang sudah selesai
+const DONE_SCORES = [
+  [2,0],[2,1],[1,1],[4,1],[0,1],[2,0],[1,1],[1,1],
+  [1,0],[7,1],[2,2],[5,1],[1,1],[0,0],[2,2],[1,1],
+  [3,1],[1,4],[3,0],[3,1]
+];
+DONE_SCORES.forEach((s,i) => { scores[i] = s; });
+
+const PALETTE = [
+  '#4e8ef7','#f75c5c','#34c97a','#f5c842','#a78bfa',
+  '#f97316','#06b6d4','#ec4899','#84cc16','#94a3b8',
+  '#fb923c','#22d3ee','#f43f5e','#a3e635','#c084fc',
+  '#38bdf8','#fbbf24','#4ade80','#f87171','#818cf8',
+  '#fdba74','#67e8f9','#f9a8d4','#bef264','#e879f9'
+];
+
+let hiddenPlayers = new Set();
+let currentFilter = 'all';
+let myChart = null;
+
+// ---------- Compute cumulative scores ----------
+function computeCumulative() {
+  const completed = scores.reduce((n,s,i) => s !== null ? i+1 : n, 0);
+  const result = {};
+  PLAYER_NAMES.forEach(name => {
+    let total = 0;
+    const cum = [];
+    for (let i = 0; i < completed; i++) {
+      if (scores[i] !== null && PICKS[name][i] === 1) total++;
+      cum.push(total);
+    }
+    result[name] = { cum, total };
+  });
+  return { result, completed };
+}
+
+// ---------- Determine winner pick for a match ----------
+function getWinnerSide(s1, s2) {
+  if (s1 === null || s2 === null) return null;
+  if (s1 > s2) return 'tim1';
+  if (s2 > s1) return 'tim2';
+  return 'draw';
+}
+
+// ---------- Sidebar: score input ----------
+function buildSidebar() {
+  const sb = document.getElementById('sidebar');
+  let html = '';
+  let lastDate = '';
+  const nextPending = scores.findIndex(x => x === null);
+  MATCHES.forEach((m, i) => {
+    if (m.date !== lastDate) {
+      if (lastDate) html += '</div>';
+      html += `<div class="date-group"><div class="date-label">${m.date}</div>`;
+      lastDate = m.date;
+    }
+    const s = scores[i];
+    const done = s !== null;
+    // Show input open by default for: done matches AND the next pending match
+    const showInput = done || i === nextPending;
+    html += `
+    <div class="match-item">
+      <div class="match-header" onclick="toggleScore(${i})">
+        <span class="match-num">M${m.no}</span>
+        <span class="match-teams">${m.t1} vs ${m.t2}</span>
+        <span class="match-status ${done ? 'status-done' : 'status-pending'}" id="status-${i}">${done ? s[0]+'-'+s[1] : '—'}</span>
+      </div>
+      <div class="score-row" id="score-row-${i}" style="display:${showInput?'flex':'none'}">
+        <span class="score-label">${m.t1.split(' ')[0]}</span>
+        <input type="number" min="0" max="99" id="s1-${i}" value="${done?s[0]:''}" placeholder="0" oninput="updateScore(${i})">
+        <span class="score-sep">—</span>
+        <input type="number" min="0" max="99" id="s2-${i}" value="${done?s[1]:''}" placeholder="0" oninput="updateScore(${i})">
+        <span class="score-label">${m.t2.split(' ')[0]}</span>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  sb.innerHTML = html;
+}
+
+function toggleScore(i) {
+  const row = document.getElementById('score-row-'+i);
+  row.style.display = row.style.display === 'none' ? 'flex' : 'none';
+}
+
+function updateScore(i) {
+  const v1 = document.getElementById('s1-'+i).value;
+  const v2 = document.getElementById('s2-'+i).value;
+  if (v1 !== '' && v2 !== '') {
+    scores[i] = [parseInt(v1), parseInt(v2)];
+    // Update status badge tanpa rebuild seluruh sidebar
+    const statusEl = document.getElementById('status-'+i);
+    if (statusEl) {
+      statusEl.textContent = scores[i][0]+'-'+scores[i][1];
+      statusEl.className = 'match-status status-done';
+    }
+    // Auto-buka input match berikutnya
+    const next = i + 1;
+    if (next < 72) {
+      const nextRow = document.getElementById('score-row-'+next);
+      if (nextRow && scores[next] === null) nextRow.style.display = 'flex';
+    }
+  } else {
+    scores[i] = null;
+    const statusEl = document.getElementById('status-'+i);
+    if (statusEl) {
+      statusEl.textContent = '—';
+      statusEl.className = 'match-status status-pending';
+    }
+  }
+  render();
+}
+
+// ---------- Filter ----------
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+// ---------- Render ----------
+function render() {
+  const { result, completed } = computeCumulative();
+  if (completed === 0) return;
+
+  document.getElementById('chart-sub').textContent = completed + ' match selesai';
+
+  // Sort by score
+  const sorted = PLAYER_NAMES.slice().sort((a,b) => result[b].total - result[a].total);
+
+  // Apply filter
+  let visible = sorted;
+  if (currentFilter === 'top5') visible = sorted.slice(0,5);
+  if (currentFilter === 'bottom5') visible = sorted.slice(-5);
+
+  // Stats
+  const leader = sorted[0];
+  const maxPts = result[leader].total;
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Pemimpin</div>
+      <div class="stat-val">${leader}</div>
+      <div class="stat-sub">${maxPts} poin dari ${completed} match</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Match selesai</div>
+      <div class="stat-val">${completed}<span style="font-size:13px;color:#4a6080"> / 72</span></div>
+      <div class="stat-sub">${72-completed} match tersisa</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Peserta</div>
+      <div class="stat-val">${PLAYER_NAMES.length}</div>
+      <div class="stat-sub">Avg ${(PLAYER_NAMES.reduce((s,n)=>s+result[n].total,0)/PLAYER_NAMES.length).toFixed(1)} poin</div>
+    </div>`;
+
+  // Chart datasets
+  const labels = Array.from({length: completed}, (_,i) => 'M'+(i+1));
+  const datasets = visible.map((name,i) => {
+    const pidx = PLAYER_NAMES.indexOf(name);
+    const color = PALETTE[pidx % PALETTE.length];
+    return {
+      label: name,
+      data: result[name].cum,
+      borderColor: color,
+      backgroundColor: color+'33',
+      borderWidth: hiddenPlayers.has(name) ? 0 : 2,
+      pointRadius: completed <= 20 ? 4 : 2,
+      pointHoverRadius: 7,
+      fill: false,
+      tension: 0.3,
+      hidden: hiddenPlayers.has(name)
+    };
+  });
+
+  if (!myChart) {
+    myChart = new Chart(document.getElementById('myChart'), {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#0d1528',
+            borderColor: '#1e2d4a',
+            borderWidth: 1,
+            titleColor: '#c8d4f0',
+            bodyColor: '#8090b0',
+            callbacks: {
+              title: items => {
+                const idx = items[0].dataIndex;
+                const m = MATCHES[idx];
+                const s = scores[idx];
+                return `M${m.no}: ${m.t1} ${s?s[0]+'-'+s[1]:''} ${m.t2}`;
+              },
+              label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y} poin`,
+              afterBody: items => {
+                const idx = items[0].dataIndex;
+                const top = visible.filter(n=>!hiddenPlayers.has(n)).sort((a,b)=>result[b].cum[idx]-result[a].cum[idx]).slice(0,3);
+                return ['', '  Top 3:', ...top.map((n,i)=>`  ${['🥇','🥈','🥉'][i]} ${n}: ${result[n].cum[idx]}`)];
+              }
+            },
+            itemSort: (a,b) => b.parsed.y - a.parsed.y
+          }
+        },
+        scales: {
+          x: { ticks: { color: '#3d5278', font:{size:10} }, grid: { color: '#0f1a2e' } },
+          y: { min:0, ticks: { color: '#3d5278', font:{size:10}, stepSize:2 }, grid: { color: '#111a30' } }
+        }
+      }
+    });
+  } else {
+    myChart.data.labels = labels;
+    myChart.data.datasets = datasets;
+    myChart.update();
+  }
+
+  // Legend
+  const legEl = document.getElementById('legend');
+  legEl.innerHTML = visible.map(name => {
+    const pidx = PLAYER_NAMES.indexOf(name);
+    const color = PALETTE[pidx % PALETTE.length];
+    return `<span class="leg ${hiddenPlayers.has(name)?'hidden':''}" onclick="togglePlayer('${name}')">
+      <span class="leg-dot" style="background:${color}"></span>${name}<span class="leg-score">${result[name].total}</span>
+    </span>`;
+  }).join('');
+
+  // Leaderboard
+  const lbEl = document.getElementById('lb-list');
+  lbEl.innerHTML = sorted.map((name,i) => {
+    const pidx = PLAYER_NAMES.indexOf(name);
+    const color = PALETTE[pidx % PALETTE.length];
+    const pts = result[name].total;
+    const pct = maxPts > 0 ? (pts/maxPts*100) : 0;
+    const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    const rankLabel = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+    return `<div class="lb-row">
+      <span class="lb-rank ${rankClass}">${rankLabel}</span>
+      <span class="lb-name">${name}</span>
+      <div class="lb-bar-wrap"><div class="lb-bar" style="width:${pct}%;background:${color}"></div></div>
+      <span class="lb-pts">${pts}</span>
+    </div>`;
+  }).join('');
+}
+
+function togglePlayer(name) {
+  if (hiddenPlayers.has(name)) hiddenPlayers.delete(name);
+  else hiddenPlayers.add(name);
+  render();
+}
+
+// Init
+buildSidebar();
+render();
+</script>
+</body>
+</html>
