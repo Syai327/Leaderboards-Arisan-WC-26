@@ -34,9 +34,6 @@
   .status-pending { background: #1a1e2a; color: #4a5270; }
 
   .score-row { display: flex; align-items: center; gap: 6px; padding: 4px 8px 8px 38px; }
-  .score-row input { width: 42px; background: #111a30; border: 1px solid #1e2d4a; border-radius: 5px; color: #e8eaf0; font-size: 14px; font-weight: 600; text-align: center; padding: 5px 2px; }
-  .score-row input:focus { outline: none; border-color: #2a72d8; background: #0f1f3a; }
-  .score-row input::placeholder { color: #2a3a55; }
   .score-sep { color: #3d5278; font-weight: 700; font-size: 14px; }
   .score-label { font-size: 11px; color: #3d5278; }
 
@@ -86,6 +83,93 @@
     .main { grid-template-columns: 1fr; }
     .sidebar { max-height: 45vh; border-right: none; border-bottom: 1px solid #1e2d4a; }
   }
+
+/* ── Prediction Panel ─────────────────────────── */
+.pred-panel {
+  background: linear-gradient(135deg,#0f2944 0%,#1a3a5c 100%);
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 18px;
+  color: #e8f0fe;
+}
+.pred-panel h2 {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #7eb8f7;
+  margin: 0 0 14px 0;
+}
+.pred-section { margin-bottom: 16px; }
+.pred-section:last-child { margin-bottom: 0; }
+.pred-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.pred-card {
+  background: rgba(255,255,255,.07);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid rgba(255,255,255,.1);
+}
+.pred-card:last-child { margin-bottom: 0; }
+.pred-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.pred-name { font-size: 12px; font-weight: 700; color: #fff; line-height: 1.3; }
+.pred-desc { font-size: 11px; color: #a0bde0; margin-top: 2px; line-height: 1.5; }
+.pred-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 99px;
+  flex-shrink: 0;
+  margin-left: auto;
+  align-self: center;
+}
+.badge-hot    { background: #ef4444; color: #fff; }
+.badge-dark   { background: #7c3aed; color: #fff; }
+.badge-safe   { background: #059669; color: #fff; }
+.badge-risk   { background: #f59e0b; color: #fff; }
+.badge-watch  { background: #2563eb; color: #fff; }
+.pred-meter {
+  height: 5px;
+  background: rgba(255,255,255,.15);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+.pred-meter-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #3b82f6, #7eb8f7);
+}
+.pred-stat-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+.pred-stat {
+  font-size: 10px;
+  color: #7eb8f7;
+  background: rgba(126,184,247,.12);
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+.pred-divider {
+  height: 1px;
+  background: rgba(255,255,255,.08);
+  margin: 10px 0;
+}
+
 </style>
 </head>
 <body>
@@ -94,7 +178,7 @@
   <div class="header-badge">⚽</div>
   <div>
     <h1>Arisan WC 2026 — Leaderboard</h1>
-    <p>Update skor di kiri → grafik langsung update otomatis</p>
+    
   </div>
 </div>
 
@@ -118,6 +202,111 @@
         </div>
       </div>
     </div>
+
+    <div class="pred-panel">
+  <h2>🔮 Analisis &amp; Prediksi</h2>
+
+  <div class="pred-section">
+    <div class="pred-label" style="color:#fbbf24;">🏆 Kandidat Kuat Juara</div>
+    <div class="pred-card">
+      <div class="pred-icon">🥇</div>
+      <div style="flex:1">
+        <div class="pred-name">Charlie — 25 poin</div>
+        <div class="pred-desc">Pemimpin sementara, max possible 57. Solid + selektif dengan hanya 6 contrarian picks. Kalau mayoritas picks lanjut bener, Charlie susah dikejar.</div>
+        <div class="pred-stat-row"><span class="pred-stat">Max 57/72</span><span class="pred-stat">6 contrarian</span><span class="pred-stat">Gap: 0</span></div>
+        <div class="pred-meter"><div class="pred-meter-fill" style="width:79%"></div></div>
+      </div>
+      <span class="pred-badge badge-hot">Favorit</span>
+    </div>
+    <div class="pred-card">
+      <div class="pred-icon">🥈</div>
+      <div style="flex:1">
+        <div class="pred-name">Enrico &amp; Raihan — 24 poin</div>
+        <div class="pred-desc">Cuma 1 poin di belakang. Raihan (4 contrarian) dan Enrico (5 contrarian) paling aman di grup atas — bisa nyalip Charlie diam-diam kalau ada 1 match yang Charlie salah tebak.</div>
+        <div class="pred-stat-row"><span class="pred-stat">Max 56/72</span><span class="pred-stat">4-5 contrarian</span><span class="pred-stat">Gap: 1</span></div>
+        <div class="pred-meter"><div class="pred-meter-fill" style="width:77%"></div></div>
+      </div>
+      <span class="pred-badge badge-safe">Konsisten</span>
+    </div>
+  </div>
+
+  <div class="pred-divider"></div>
+
+  <div class="pred-section">
+    <div class="pred-label" style="color:#a78bfa;">🌑 Dark Horse</div>
+    <div class="pred-card">
+      <div class="pred-icon">🎰</div>
+      <div style="flex:1">
+        <div class="pred-name">Vando — 23 poin</div>
+        <div class="pred-desc">10 contrarian picks di sisa 32 match — terbanyak di grup papan atas. Banyak pilih Seri di match sulit. Kalau 5-6 upset kecil kejadian, Vando bisa loncat ke #1 tiba-tiba.</div>
+        <div class="pred-stat-row"><span class="pred-stat">Max 55/72</span><span class="pred-stat">10 contrarian</span><span class="pred-stat">Gap: 2</span></div>
+        <div class="pred-meter"><div class="pred-meter-fill" style="width:74%"></div></div>
+      </div>
+      <span class="pred-badge badge-dark">Dark Horse</span>
+    </div>
+    <div class="pred-card">
+      <div class="pred-icon">⚡</div>
+      <div style="flex:1">
+        <div class="pred-name">Istie — 23 poin</div>
+        <div class="pred-desc">7 contrarian picks yang targeted — beda dari Charlie &amp; Enrico di match kunci. Kalau upset-nya bener, Istie bisa langsung salip dua orang sekaligus. Potensi comeback besar.</div>
+        <div class="pred-stat-row"><span class="pred-stat">Max 55/72</span><span class="pred-stat">7 contrarian</span><span class="pred-stat">Gap: 2</span></div>
+        <div class="pred-meter"><div class="pred-meter-fill" style="width:74%"></div></div>
+      </div>
+      <span class="pred-badge badge-dark">Dark Horse</span>
+    </div>
+    <div class="pred-card">
+      <div class="pred-icon">🎯</div>
+      <div style="flex:1">
+        <div class="pred-name">Gilang — 21 poin</div>
+        <div class="pred-desc">4 poin di belakang tapi 7 contrarian picks yang "targeted" di match-match kunci. Cukup 4 upset bener → langsung loncat ke podium. Lebih realistis dari Bayu.</div>
+        <div class="pred-stat-row"><span class="pred-stat">Max 53/72</span><span class="pred-stat">7 contrarian</span><span class="pred-stat">Gap: 4</span></div>
+        <div class="pred-meter"><div class="pred-meter-fill" style="width:70%"></div></div>
+      </div>
+      <span class="pred-badge badge-dark">Dark Horse</span>
+    </div>
+  </div>
+
+  <div class="pred-divider"></div>
+
+  <div class="pred-section">
+    <div class="pred-label" style="color:#f87171;">⚠️ High Risk</div>
+    <div class="pred-card">
+      <div class="pred-icon">🎲</div>
+      <div style="flex:1">
+        <div class="pred-name">Bayu — 21 poin</div>
+        <div class="pred-desc">10 contrarian picks termasuk yang super ekstrem — pilih tim underdog berat. Kalau semua bener → juara telak. Kalau salah → finish bawah. All-or-nothing total.</div>
+        <div class="pred-stat-row"><span class="pred-stat">Max 53/72</span><span class="pred-stat">10 contrarian</span><span class="pred-stat">Gap: 4</span></div>
+        <div class="pred-meter"><div class="pred-meter-fill" style="width:65%"></div></div>
+      </div>
+      <span class="pred-badge badge-risk">High Risk</span>
+    </div>
+    <div class="pred-card">
+      <div class="pred-icon">🌪️</div>
+      <div style="flex:1">
+        <div class="pred-name">Ikiw — 14 poin</div>
+        <div class="pred-desc">22 contrarian picks dari 32 sisa — hampir beda sendiri di setiap match. Butuh 11+ upset berturut-turut untuk bisa juara. Butuh piala dunia paling gila sepanjang sejarah.</div>
+        <div class="pred-stat-row"><span class="pred-stat">Max 46/72</span><span class="pred-stat">22 contrarian</span><span class="pred-stat">Gap: 11</span></div>
+        <div class="pred-meter"><div class="pred-meter-fill" style="width:50%"></div></div>
+      </div>
+      <span class="pred-badge badge-risk">Underdog</span>
+    </div>
+  </div>
+
+  <div class="pred-divider"></div>
+
+  <div class="pred-section">
+    <div class="pred-label" style="color:#60a5fa;">👀 Watch Out</div>
+    <div class="pred-card">
+      <div class="pred-icon">👀</div>
+      <div style="flex:1">
+        <div class="pred-name">Robi, Rustam &amp; Tika — 22 poin</div>
+        <div class="pred-desc"><b>Robi</b> paling sedikit contrarian (3 picks) — hampir semua sama mayoritas, tinggal tunggu hasil. <b>Rustam &amp; Tika</b> hanya 4 contrarian — posisi bagus, bisa mencuri podium kalau Charlie &amp; Enrico kesandung.</div>
+        <div class="pred-stat-row"><span class="pred-stat">Robi: 3 contrarian</span><span class="pred-stat">Rustam: 4</span><span class="pred-stat">Tika: 4</span></div>
+      </div>
+      <span class="pred-badge badge-watch">Watch</span>
+    </div>
+  </div>
+</div>
 
     <div class="stats-row" id="stats-row"></div>
 
@@ -222,31 +411,31 @@ const MATCHES = [
 // picks[player][matchIndex] = 1 jika pemain pick benar, 0 jika salah
 // Data ini sudah fix dari file Excel — hanya skor yang perlu diupdate
 const PICKS = {
-  "Enrico":[0,1,0,1,1,0,0,1,0,1,1,1,0,0,1,0,1,1,1,1,0,1,0,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Dwi":[1,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Bayu":[1,0,0,1,1,1,0,0,1,1,0,1,0,0,0,0,1,1,1,1,0,1,0,0,0,1,1,0,1,0,1,0,1,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Bryan":[0,1,0,1,1,0,0,0,0,1,0,0,0,0,0,0,1,1,1,1,0,0,0,1,0,1,1,1,1,0,1,0,1,0,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Putu":[1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,1,0,1,1,1,1,0,1,0,1,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Anton":[1,0,1,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,1,0,1,0,1,0,1,0,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Pak Yo":[1,0,1,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Diana":[1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,1,1,1,1,1,1,0,0,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Chris":[1,0,0,1,1,0,0,0,1,1,0,1,0,0,0,0,1,1,1,1,1,0,0,1,1,0,1,0,1,0,1,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Charlie":[1,1,0,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Gilang":[1,1,0,0,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,1,1,1,1,0,1,1,0,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Rajib":[1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,0,0,1,1,0,1,1,0,1,1,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Sidra":[1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,1,1,1,1,0,1,0,1,0,1,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Mario":[1,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Tri Wardoyo":[0,0,0,1,1,0,0,0,1,1,1,1,0,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Raihan":[0,1,0,1,1,1,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Latif":[1,1,0,1,1,0,1,0,0,1,1,1,0,0,0,0,1,1,1,1,1,0,0,1,0,1,1,0,1,0,0,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Rustam":[1,0,0,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,1,0,1,0,1,1,1,1,1,1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Istie":[0,1,1,1,1,0,1,1,0,1,1,1,1,0,0,0,1,1,1,1,0,0,0,0,1,0,0,0,1,0,0,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Tika":[1,0,0,1,1,1,0,1,0,1,0,1,0,0,0,0,1,0,1,1,1,0,0,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Nike":[1,1,1,0,1,1,0,0,0,1,0,1,0,0,0,0,1,0,1,0,0,1,0,1,1,0,0,0,1,1,0,1,1,0,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Ikiw":[0,0,0,1,0,1,0,1,0,1,0,0,1,0,0,0,1,0,1,1,0,0,0,0,0,1,0,0,0,0,1,0,1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Eja":[0,1,1,0,1,0,0,0,0,1,0,1,1,0,0,0,1,1,1,1,1,1,0,1,0,1,0,0,1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Vando":[1,1,1,0,1,0,1,0,1,1,0,1,0,0,0,0,1,1,1,0,1,1,0,1,0,1,1,0,1,0,1,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Robi":[1,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+  "Istie":      [0,1,1,1,1,0,1,1,0,1,1,1,1,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Enrico":     [0,1,0,1,1,0,0,1,0,1,1,1,0,0,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Latif":      [1,1,0,1,1,0,1,0,0,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Bayu":       [1,0,0,1,1,1,0,0,1,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Charlie":    [1,1,0,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Diana":      [1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Tri Wardoyo":[0,0,0,1,1,0,0,0,1,1,1,1,0,0,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Vando":      [1,1,1,0,1,0,1,0,1,1,0,1,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Anton":      [1,0,1,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Chris":      [1,0,0,1,1,0,0,0,1,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Eja":        [0,1,1,0,1,0,0,0,0,1,0,1,1,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Pak Yo":     [1,0,1,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Putu":       [1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Raihan":     [0,1,0,1,1,1,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Rajib":      [1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Rustam":     [1,0,0,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Sidra":      [1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Tika":       [1,0,0,1,1,1,0,1,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Dwi":        [1,0,1,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Gilang":     [1,1,0,0,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Mario":      [1,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Nike":       [1,1,1,0,1,1,0,0,0,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Robi":       [1,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Bryan":      [0,1,0,1,1,0,0,0,0,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Ikiw":       [0,0,0,1,0,1,0,1,0,1,0,0,1,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 };
 
 const PLAYER_NAMES = Object.keys(PICKS);
@@ -257,7 +446,9 @@ let scores = new Array(72).fill(null);
 
 // Pre-fill skor match 1-20 yang sudah selesai
 const DONE_SCORES = [
-  [2,0],[2,1],[1,1],[4,1],[0,1],[2,0],[1,1],[1,1],[1,0],[7,1],[2,2],[5,1],[1,1],[0,0],[2,2],[1,1],[3,1],[1,4],[3,0],[3,1],[1,0],[4,2],[1,1],[1,3],[1,1],[4,1],[6,0],[1,0],[3,0],[0,1],[2,0],[0,1],[2,1],[0,0],[5,1],[0,4],[0,0],[1,3],[4,0],[2,2]
+  [2,0],[2,1],[1,1],[4,1],[0,1],[2,0],[1,1],[1,1],
+  [1,0],[7,1],[2,2],[5,1],[1,1],[0,0],[2,2],[1,1],
+  [3,1],[1,4],[3,0],[3,1],[3,0]
 ];
 DONE_SCORES.forEach((s,i) => { scores[i] = s; });
 
@@ -297,12 +488,11 @@ function getWinnerSide(s1, s2) {
   return 'draw';
 }
 
-// ---------- Sidebar: score input ----------
+// ---------- Sidebar: read-only score table ----------
 function buildSidebar() {
   const sb = document.getElementById('sidebar');
   let html = '';
   let lastDate = '';
-  const nextPending = scores.findIndex(x => x === null);
   MATCHES.forEach((m, i) => {
     if (m.date !== lastDate) {
       if (lastDate) html += '</div>';
@@ -311,59 +501,27 @@ function buildSidebar() {
     }
     const s = scores[i];
     const done = s !== null;
-    // Show input open by default for: done matches AND the next pending match
-    const showInput = done || i === nextPending;
+    const hasil = done
+      ? (s[0] > s[1] ? `✅ ${m.t1}` : s[1] > s[0] ? `✅ ${m.t2}` : '🤝 Seri')
+      : '';
     html += `
-    <div class="match-item">
-      <div class="match-header" onclick="toggleScore(${i})">
+    <div class="match-item" style="cursor:default;">
+      <div class="match-header" style="cursor:default;">
         <span class="match-num">M${m.no}</span>
         <span class="match-teams">${m.t1} vs ${m.t2}</span>
-        <span class="match-status ${done ? 'status-done' : 'status-pending'}" id="status-${i}">${done ? s[0]+'-'+s[1] : '—'}</span>
+        <span class="match-status ${done ? 'status-done' : 'status-pending'}">
+          ${done ? `${s[0]} — ${s[1]}` : '⏳'}
+        </span>
       </div>
-      <div class="score-row" id="score-row-${i}" style="display:${showInput?'flex':'none'}">
-        <span class="score-label">${m.t1.split(' ')[0]}</span>
-        <input type="number" min="0" max="99" id="s1-${i}" value="${done?s[0]:''}" placeholder="0" oninput="updateScore(${i})">
-        <span class="score-sep">—</span>
-        <input type="number" min="0" max="99" id="s2-${i}" value="${done?s[1]:''}" placeholder="0" oninput="updateScore(${i})">
-        <span class="score-label">${m.t2.split(' ')[0]}</span>
-      </div>
+      ${done ? `<div style="font-size:10px;color:#4a9;padding:2px 10px 6px 32px;">${hasil}</div>` : ''}
     </div>`;
   });
   html += '</div>';
   sb.innerHTML = html;
 }
 
-function toggleScore(i) {
-  const row = document.getElementById('score-row-'+i);
-  row.style.display = row.style.display === 'none' ? 'flex' : 'none';
-}
-
-function updateScore(i) {
-  const v1 = document.getElementById('s1-'+i).value;
-  const v2 = document.getElementById('s2-'+i).value;
-  if (v1 !== '' && v2 !== '') {
-    scores[i] = [parseInt(v1), parseInt(v2)];
-    // Update status badge tanpa rebuild seluruh sidebar
-    const statusEl = document.getElementById('status-'+i);
-    if (statusEl) {
-      statusEl.textContent = scores[i][0]+'-'+scores[i][1];
-      statusEl.className = 'match-status status-done';
-    }
-    // Auto-buka input match berikutnya
-    const next = i + 1;
-    if (next < 72) {
-      const nextRow = document.getElementById('score-row-'+next);
-      if (nextRow && scores[next] === null) nextRow.style.display = 'flex';
-    }
-  } else {
-    scores[i] = null;
-    const statusEl = document.getElementById('status-'+i);
-    if (statusEl) {
-      statusEl.textContent = '—';
-      statusEl.className = 'match-status status-pending';
-    }
-  }
-  render();
+function toggleScore(i) { /* disabled */ }
+function updateScore(i) { /* disabled */
 }
 
 // ---------- Filter ----------
