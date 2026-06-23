@@ -1,1 +1,0 @@
-# Leaderboards-Arisan-WC-26
