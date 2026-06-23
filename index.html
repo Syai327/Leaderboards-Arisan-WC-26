@@ -6,194 +6,129 @@
 <title>Arisan WC 2026 — Leaderboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0f1e; color: #e8eaf0; min-height: 100vh; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0f1e; color: #e8eaf0; min-height: 100vh; }
+.header { background: #0d1528; border-bottom: 1px solid #1e2d4a; padding: 16px 24px; display: flex; align-items: center; gap: 14px; }
+.header h1 { font-size: 18px; font-weight: 600; color: #fff; }
+.header p { font-size: 12px; color: #6b7fa3; margin-top: 2px; }
 
-  /* Header */
-  .header { background: #0d1528; border-bottom: 1px solid #1e2d4a; padding: 18px 24px; display: flex; align-items: center; gap: 14px; }
-  .header-badge { background: #1a3560; border: 1px solid #2a5090; border-radius: 8px; padding: 8px 14px; font-size: 22px; }
-  .header h1 { font-size: 18px; font-weight: 600; color: #ffffff; }
-  .header p { font-size: 13px; color: #6b7fa3; margin-top: 2px; }
+/* Tab nav */
+.tabs { display: flex; background: #0d1528; border-bottom: 1px solid #1e2d4a; }
+.tab { padding: 12px 22px; font-size: 13px; color: #4a6080; cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; }
+.tab.active { color: #7ab0f0; border-bottom-color: #2a72d8; }
+.tab:hover:not(.active) { color: #8090b0; }
 
-  /* Layout */
-  .main { display: grid; grid-template-columns: 340px 1fr; gap: 0; min-height: calc(100vh - 65px); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
 
-  /* Sidebar */
-  .sidebar { background: #0d1528; border-right: 1px solid #1e2d4a; padding: 0; overflow-y: auto; }
-  .sidebar-section { padding: 16px 20px; border-bottom: 1px solid #1a2540; }
-  .sidebar-section h2 { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: #4a6080; text-transform: uppercase; margin-bottom: 12px; }
+/* ===== LAYOUT MAIN ===== */
+.main { display: grid; grid-template-columns: 320px 1fr; min-height: calc(100vh - 100px); }
+.sidebar { background: #0d1528; border-right: 1px solid #1e2d4a; overflow-y: auto; max-height: calc(100vh - 100px); }
+.chart-area { padding: 18px 22px; overflow-y: auto; max-height: calc(100vh - 100px); display: flex; flex-direction: column; gap: 14px; }
 
-  /* Score input */
-  .match-item { margin-bottom: 6px; }
-  .match-header { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; cursor: pointer; padding: 6px 8px; border-radius: 6px; transition: background .15s; }
-  .match-header:hover { background: #141f38; }
-  .match-num { font-size: 10px; color: #3d5278; font-weight: 600; width: 22px; flex-shrink: 0; }
-  .match-teams { font-size: 12px; color: #8090b0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .match-status { font-size: 10px; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
-  .status-done { background: #0d2d1a; color: #3dbd6a; }
-  .status-pending { background: #1a1e2a; color: #4a5270; }
+/* Sidebar */
+.date-label { font-size: 10px; color: #2a4060; font-weight: 700; padding: 10px 12px 4px; letter-spacing:.07em; text-transform: uppercase; }
+.match-item { border-bottom: 1px solid #111a30; }
+.match-header { display: flex; align-items: center; gap: 6px; padding: 7px 12px; cursor: pointer; transition: background .15s; }
+.match-header:hover { background: #131f38; }
+.match-num { font-size: 10px; color: #3d5278; font-weight: 700; width: 22px; flex-shrink:0; }
+.match-flags { display: flex; align-items: center; gap: 3px; flex: 1; font-size: 12px; color: #8090b0; overflow: hidden; }
+.flag { font-size: 15px; line-height: 1; }
+.match-vs { font-size: 10px; color: #3d5278; padding: 0 2px; }
+.match-name { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+.match-status { font-size: 10px; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+.status-done { background: #0d2d1a; color: #3dbd6a; }
+.status-pending { background: #1a1e2a; color: #4a5270; }
 
-  .score-row { display: flex; align-items: center; gap: 6px; padding: 4px 8px 8px 38px; }
-  .score-sep { color: #3d5278; font-weight: 700; font-size: 14px; }
-  .score-label { font-size: 11px; color: #3d5278; }
+.score-row { display: flex; align-items: center; gap: 5px; padding: 3px 12px 8px 36px; }
+.score-row input { width: 40px; background: #111a30; border: 1px solid #1e2d4a; border-radius: 5px; color: #e8eaf0; font-size: 14px; font-weight: 700; text-align: center; padding: 4px 2px; }
+.score-row input:focus { outline: none; border-color: #2a72d8; }
+.score-sep { color: #3d5278; font-weight: 700; }
+.score-team { font-size: 10px; color: #3d5278; }
 
-  /* Date group */
-  .date-group { margin-bottom: 2px; }
-  .date-label { font-size: 10px; color: #2a4060; font-weight: 600; padding: 8px 8px 4px; letter-spacing: 0.06em; text-transform: uppercase; }
+/* Stats */
+.stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.stat-card { background: #0d1528; border: 1px solid #1e2d4a; border-radius: 8px; padding: 11px 13px; }
+.stat-label { font-size: 10px; color: #4a6080; text-transform: uppercase; letter-spacing:.06em; }
+.stat-val { font-size: 20px; font-weight: 700; color: #fff; margin-top: 2px; }
+.stat-sub { font-size: 11px; color: #4a8060; margin-top: 1px; }
 
-  /* Chart area */
-  .chart-area { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
-  .chart-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-  .chart-title { font-size: 15px; font-weight: 600; color: #c8d4f0; }
-  .chart-sub { font-size: 12px; color: #4a6080; margin-top: 2px; }
+/* Chart */
+.chart-wrap { background: #0d1528; border: 1px solid #1e2d4a; border-radius: 10px; padding: 14px; }
+.chart-canvas-wrap { position: relative; height: 360px; }
+.section-title { font-size: 11px; font-weight: 600; letter-spacing:.08em; color: #4a6080; text-transform: uppercase; margin-bottom: 10px; }
 
-  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .stat-card { background: #0d1528; border: 1px solid #1e2d4a; border-radius: 8px; padding: 12px 14px; }
-  .stat-label { font-size: 10px; color: #4a6080; text-transform: uppercase; letter-spacing: 0.06em; }
-  .stat-val { font-size: 20px; font-weight: 700; color: #ffffff; margin-top: 3px; }
-  .stat-sub { font-size: 11px; color: #4a8060; margin-top: 1px; }
+/* Legend */
+.legend-grid { display: flex; flex-wrap: wrap; gap: 5px 12px; }
+.leg { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #6b7fa3; cursor: pointer; }
+.leg-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink:0; }
+.leg.hidden { opacity:.3; }
+.leg-score { font-weight: 600; color: #8090b0; }
 
-  .chart-wrap { background: #0d1528; border: 1px solid #1e2d4a; border-radius: 10px; padding: 16px; position: relative; }
-  .chart-canvas-wrap { position: relative; height: 380px; }
+/* Leaderboard */
+.lb-list { display: flex; flex-direction: column; gap: 3px; }
+.lb-row { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 6px; background: #0d1528; border: 1px solid #1a2540; }
+.lb-rank { font-size: 11px; font-weight: 700; width: 22px; text-align: center; color: #4a6080; }
+.lb-rank.gold { color: #f5c842; } .lb-rank.silver { color: #a0b0c8; } .lb-rank.bronze { color: #c87840; }
+.lb-name { flex:1; font-size: 12px; color: #c8d4f0; }
+.lb-bar-wrap { width: 80px; background: #111a30; border-radius: 3px; height: 5px; }
+.lb-bar { height: 5px; border-radius: 3px; }
+.lb-pts { font-size: 12px; font-weight: 700; color: #fff; width: 20px; text-align: right; }
 
-  /* Legend */
-  .legend-grid { display: flex; flex-wrap: wrap; gap: 6px 14px; }
-  .leg { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #6b7fa3; cursor: pointer; padding: 3px 0; }
-  .leg-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
-  .leg.hidden { opacity: 0.3; }
-  .leg-score { font-weight: 600; color: #8090b0; margin-left: 2px; }
+/* Filter btns */
+.filter-row { display: flex; gap: 6px; }
+.filter-btn { background: #111a30; border: 1px solid #1e2d4a; border-radius: 5px; color: #6b7fa3; font-size: 11px; padding: 4px 10px; cursor: pointer; }
+.filter-btn.active { background: #1a3560; border-color: #2a5090; color: #7ab0f0; }
 
-  /* Leaderboard */
-  .lb-list { display: flex; flex-direction: column; gap: 4px; }
-  .lb-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 6px; background: #0d1528; border: 1px solid #1a2540; }
-  .lb-rank { font-size: 11px; font-weight: 700; width: 20px; text-align: center; color: #4a6080; }
-  .lb-rank.gold { color: #f5c842; }
-  .lb-rank.silver { color: #a0b0c8; }
-  .lb-rank.bronze { color: #c87840; }
-  .lb-name { flex: 1; font-size: 12px; color: #c8d4f0; }
-  .lb-bar-wrap { width: 90px; background: #111a30; border-radius: 3px; height: 5px; }
-  .lb-bar { height: 5px; border-radius: 3px; }
-  .lb-pts { font-size: 12px; font-weight: 700; color: #ffffff; width: 22px; text-align: right; }
-
-  .filter-row { display: flex; gap: 6px; }
-  .filter-btn { background: #111a30; border: 1px solid #1e2d4a; border-radius: 5px; color: #6b7fa3; font-size: 11px; padding: 4px 10px; cursor: pointer; }
-  .filter-btn.active { background: #1a3560; border-color: #2a5090; color: #7ab0f0; }
-
-  @media (max-width: 768px) {
-    .main { grid-template-columns: 1fr; }
-    .sidebar { max-height: 45vh; border-right: none; border-bottom: 1px solid #1e2d4a; }
-  }
-
-/* ── Prediction Panel ─────────────────────────── */
-.pred-panel {
-  background: linear-gradient(135deg,#0f2944 0%,#1a3a5c 100%);
-  border-radius: 16px;
-  padding: 20px;
-  margin-top: 18px;
-  color: #e8f0fe;
-}
-.pred-panel h2 {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: #7eb8f7;
-  margin: 0 0 14px 0;
-}
-.pred-section { margin-bottom: 16px; }
-.pred-section:last-child { margin-bottom: 0; }
-.pred-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-.pred-card {
-  background: rgba(255,255,255,.07);
-  border-radius: 10px;
-  padding: 10px 12px;
-  margin-bottom: 6px;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  border: 1px solid rgba(255,255,255,.1);
-}
-.pred-card:last-child { margin-bottom: 0; }
-.pred-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-.pred-name { font-size: 12px; font-weight: 700; color: #fff; line-height: 1.3; }
-.pred-desc { font-size: 11px; color: #a0bde0; margin-top: 2px; line-height: 1.5; }
-.pred-badge {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: .07em;
-  text-transform: uppercase;
-  padding: 2px 7px;
-  border-radius: 99px;
-  flex-shrink: 0;
-  margin-left: auto;
-  align-self: center;
-}
-.badge-hot    { background: #ef4444; color: #fff; }
-.badge-dark   { background: #7c3aed; color: #fff; }
-.badge-safe   { background: #059669; color: #fff; }
-.badge-risk   { background: #f59e0b; color: #fff; }
-.badge-watch  { background: #2563eb; color: #fff; }
-.pred-meter {
-  height: 5px;
-  background: rgba(255,255,255,.15);
-  border-radius: 99px;
-  overflow: hidden;
-  margin-top: 6px;
-}
-.pred-meter-fill {
-  height: 100%;
-  border-radius: 99px;
-  background: linear-gradient(90deg, #3b82f6, #7eb8f7);
-}
-.pred-stat-row {
-  display: flex;
-  gap: 8px;
-  margin-top: 4px;
-  flex-wrap: wrap;
-}
-.pred-stat {
-  font-size: 10px;
-  color: #7eb8f7;
-  background: rgba(126,184,247,.12);
-  padding: 2px 7px;
-  border-radius: 6px;
-}
-.pred-divider {
-  height: 1px;
-  background: rgba(255,255,255,.08);
-  margin: 10px 0;
-}
-
+/* ===== GROUP STANDINGS TAB ===== */
+.groups-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; padding: 20px; }
+.group-card { background: #0d1528; border: 1px solid #1e2d4a; border-radius: 10px; overflow: hidden; }
+.group-card-header { background: #111e38; padding: 10px 14px; font-size: 12px; font-weight: 700; color: #7ab0f0; letter-spacing: .05em; }
+.group-table { width: 100%; border-collapse: collapse; }
+.group-table th { font-size: 10px; color: #3d5278; font-weight: 600; text-transform: uppercase; letter-spacing:.06em; padding: 6px 8px; text-align: center; border-bottom: 1px solid #111a30; }
+.group-table th:first-child { text-align: left; padding-left: 14px; }
+.group-table td { font-size: 12px; padding: 7px 8px; text-align: center; border-bottom: 1px solid #0f1728; }
+.group-table td:first-child { text-align: left; padding-left: 14px; }
+.group-table tr:last-child td { border-bottom: none; }
+.group-table tr:hover td { background: #111a30; }
+.team-cell { display: flex; align-items: center; gap: 7px; }
+.team-flag { font-size: 18px; line-height: 1; }
+.team-name { font-size: 12px; color: #c8d4f0; }
+.pts-cell { font-weight: 700; color: #fff; }
+.qualify { background: #0a2015 !important; }
+.qualify td { border-left: 2px solid #1a6040; }
+.qualify td:first-child { border-left: 2px solid #1a6040; }
+.pos-badge { display: inline-block; width: 18px; height: 18px; border-radius: 4px; font-size: 10px; font-weight: 700; line-height: 18px; text-align: center; margin-right: 4px; }
+.pos-1 { background: #1a3a60; color: #7ab0f0; }
+.pos-2 { background: #1a3020; color: #4a9060; }
+.pos-3 { background: #2a2010; color: #806040; }
+.pos-4 { background: #1e1a1a; color: #604040; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="header-badge">⚽</div>
+  <div style="font-size:28px">⚽</div>
   <div>
     <h1>Arisan WC 2026 — Leaderboard</h1>
-    
+    <p>Update setiap jam 12.00</p>
   </div>
 </div>
 
-<div class="main">
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('chart',this)">📈 Grafik & Poin</div>
+  <div class="tab" onclick="switchTab('groups',this)">🏆 Klasemen Grup</div>
+</div>
 
-  <!-- SIDEBAR: Score Input -->
-  <div class="sidebar" id="sidebar"></div>
-
-  <!-- CHART AREA -->
-  <div class="chart-area">
-    <div>
-      <div class="chart-top">
+<!-- TAB 1: CHART -->
+<div id="tab-chart" class="tab-content active">
+  <div class="main">
+    <div class="sidebar" id="sidebar"></div>
+    <div class="chart-area">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
         <div>
-          <div class="chart-title">Perjalanan Poin per Match</div>
-          <div class="chart-sub" id="chart-sub">— match selesai</div>
+          <div style="font-size:15px;font-weight:600;color:#c8d4f0;">Perjalanan Poin per Match</div>
+          <div style="font-size:12px;color:#4a6080;margin-top:2px;" id="chart-sub">— match selesai</div>
         </div>
         <div class="filter-row">
           <button class="filter-btn active" onclick="setFilter('all',this)">Semua</button>
@@ -201,469 +136,393 @@
           <button class="filter-btn" onclick="setFilter('bottom5',this)">Bottom 5</button>
         </div>
       </div>
-    </div>
-
-    <div class="pred-panel">
-  <h2>🔮 Analisis &amp; Prediksi</h2>
-
-  <div class="pred-section">
-    <div class="pred-label" style="color:#fbbf24;">🏆 Kandidat Kuat Juara</div>
-    <div class="pred-card">
-      <div class="pred-icon">🥇</div>
-      <div style="flex:1">
-        <div class="pred-name">Charlie — 25 poin</div>
-        <div class="pred-desc">Pemimpin sementara, max possible 57. Solid + selektif dengan hanya 6 contrarian picks. Kalau mayoritas picks lanjut bener, Charlie susah dikejar.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Max 57/72</span><span class="pred-stat">6 contrarian</span><span class="pred-stat">Gap: 0</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:79%"></div></div>
+      <div class="stats-row" id="stats-row"></div>
+      <div class="chart-wrap"><div class="chart-canvas-wrap"><canvas id="myChart"></canvas></div></div>
+      <div>
+        <div class="section-title" style="margin-bottom:8px;">Legend — klik untuk hide/show</div>
+        <div class="legend-grid" id="legend"></div>
       </div>
-      <span class="pred-badge badge-hot">Favorit</span>
-    </div>
-    <div class="pred-card">
-      <div class="pred-icon">🥈</div>
-      <div style="flex:1">
-        <div class="pred-name">Enrico &amp; Raihan — 24 poin</div>
-        <div class="pred-desc">Cuma 1 poin di belakang. Raihan (4 contrarian) dan Enrico (5 contrarian) paling aman di grup atas — bisa nyalip Charlie diam-diam kalau ada 1 match yang Charlie salah tebak.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Max 56/72</span><span class="pred-stat">4-5 contrarian</span><span class="pred-stat">Gap: 1</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:77%"></div></div>
+      <div>
+        <div class="section-title" style="margin-bottom:8px;">Klasemen saat ini</div>
+        <div class="lb-list" id="lb-list"></div>
       </div>
-      <span class="pred-badge badge-safe">Konsisten</span>
-    </div>
-  </div>
-
-  <div class="pred-divider"></div>
-
-  <div class="pred-section">
-    <div class="pred-label" style="color:#a78bfa;">🌑 Dark Horse</div>
-    <div class="pred-card">
-      <div class="pred-icon">🎰</div>
-      <div style="flex:1">
-        <div class="pred-name">Vando — 23 poin</div>
-        <div class="pred-desc">10 contrarian picks di sisa 32 match — terbanyak di grup papan atas. Banyak pilih Seri di match sulit. Kalau 5-6 upset kecil kejadian, Vando bisa loncat ke #1 tiba-tiba.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Max 55/72</span><span class="pred-stat">10 contrarian</span><span class="pred-stat">Gap: 2</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:74%"></div></div>
-      </div>
-      <span class="pred-badge badge-dark">Dark Horse</span>
-    </div>
-    <div class="pred-card">
-      <div class="pred-icon">⚡</div>
-      <div style="flex:1">
-        <div class="pred-name">Istie — 23 poin</div>
-        <div class="pred-desc">7 contrarian picks yang targeted — beda dari Charlie &amp; Enrico di match kunci. Kalau upset-nya bener, Istie bisa langsung salip dua orang sekaligus. Potensi comeback besar.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Max 55/72</span><span class="pred-stat">7 contrarian</span><span class="pred-stat">Gap: 2</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:74%"></div></div>
-      </div>
-      <span class="pred-badge badge-dark">Dark Horse</span>
-    </div>
-    <div class="pred-card">
-      <div class="pred-icon">🎯</div>
-      <div style="flex:1">
-        <div class="pred-name">Gilang — 21 poin</div>
-        <div class="pred-desc">4 poin di belakang tapi 7 contrarian picks yang "targeted" di match-match kunci. Cukup 4 upset bener → langsung loncat ke podium. Lebih realistis dari Bayu.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Max 53/72</span><span class="pred-stat">7 contrarian</span><span class="pred-stat">Gap: 4</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:70%"></div></div>
-      </div>
-      <span class="pred-badge badge-dark">Dark Horse</span>
-    </div>
-  </div>
-
-  <div class="pred-divider"></div>
-
-  <div class="pred-section">
-    <div class="pred-label" style="color:#f87171;">⚠️ High Risk</div>
-    <div class="pred-card">
-      <div class="pred-icon">🎲</div>
-      <div style="flex:1">
-        <div class="pred-name">Bayu — 21 poin</div>
-        <div class="pred-desc">10 contrarian picks termasuk yang super ekstrem — pilih tim underdog berat. Kalau semua bener → juara telak. Kalau salah → finish bawah. All-or-nothing total.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Max 53/72</span><span class="pred-stat">10 contrarian</span><span class="pred-stat">Gap: 4</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:65%"></div></div>
-      </div>
-      <span class="pred-badge badge-risk">High Risk</span>
-    </div>
-    <div class="pred-card">
-      <div class="pred-icon">🌪️</div>
-      <div style="flex:1">
-        <div class="pred-name">Ikiw — 14 poin</div>
-        <div class="pred-desc">22 contrarian picks dari 32 sisa — hampir beda sendiri di setiap match. Butuh 11+ upset berturut-turut untuk bisa juara. Butuh piala dunia paling gila sepanjang sejarah.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Max 46/72</span><span class="pred-stat">22 contrarian</span><span class="pred-stat">Gap: 11</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:50%"></div></div>
-      </div>
-      <span class="pred-badge badge-risk">Underdog</span>
-    </div>
-  </div>
-
-  <div class="pred-divider"></div>
-
-  <div class="pred-section">
-    <div class="pred-label" style="color:#60a5fa;">👀 Watch Out</div>
-    <div class="pred-card">
-      <div class="pred-icon">👀</div>
-      <div style="flex:1">
-        <div class="pred-name">Robi, Rustam &amp; Tika — 22 poin</div>
-        <div class="pred-desc"><b>Robi</b> paling sedikit contrarian (3 picks) — hampir semua sama mayoritas, tinggal tunggu hasil. <b>Rustam &amp; Tika</b> hanya 4 contrarian — posisi bagus, bisa mencuri podium kalau Charlie &amp; Enrico kesandung.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Robi: 3 contrarian</span><span class="pred-stat">Rustam: 4</span><span class="pred-stat">Tika: 4</span></div>
-      </div>
-      <span class="pred-badge badge-watch">Watch</span>
     </div>
   </div>
 </div>
 
-    <div class="stats-row" id="stats-row"></div>
-
-    <div class="chart-wrap">
-      <div class="chart-canvas-wrap">
-        <canvas id="myChart" role="img" aria-label="Grafik kumulatif poin Arisan WC 2026"></canvas>
-      </div>
-    </div>
-
-    <div>
-      <div class="sidebar-section" style="padding: 0 0 12px 0; border: none;">
-        <h2 style="margin-bottom:10px;">Legend — klik untuk hide/show</h2>
-        <div class="legend-grid" id="legend"></div>
-      </div>
-    </div>
-
-    <div>
-      <div style="margin-bottom:10px; display:flex; align-items:center; justify-content:space-between;">
-        <span style="font-size:11px; font-weight:600; letter-spacing:.08em; color:#4a6080; text-transform:uppercase;">Klasemen saat ini</span>
-      </div>
-      <div class="lb-list" id="lb-list"></div>
-    </div>
-  </div>
+<!-- TAB 2: GROUP STANDINGS -->
+<div id="tab-groups" class="tab-content">
+  <div class="groups-grid" id="groups-grid"></div>
 </div>
 
 <script>
+// ============================================================
+// FLAG MAP
+// ============================================================
+const FLAGS = {
+  'Mexico':'🇲🇽','South Africa':'🇿🇦','Korea Republic':'🇰🇷','Czechia':'🇨🇿',
+  'Canada':'🇨🇦','Bosnia-Herz.':'🇧🇦','USA':'🇺🇸','Paraguay':'🇵🇾',
+  'Haiti':'🇭🇹','Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Australia':'🇦🇺','Türkiye':'🇹🇷',
+  'Brazil':'🇧🇷','Morocco':'🇲🇦','Qatar':'🇶🇦','Switzerland':'🇨🇭',
+  "Côte d'Ivoire":'🇨🇮','Ecuador':'🇪🇨','Germany':'🇩🇪','Curaçao':'🇨🇼',
+  'Netherlands':'🇳🇱','Japan':'🇯🇵','Sweden':'🇸🇪','Tunisia':'🇹🇳',
+  'Saudi Arabia':'🇸🇦','Uruguay':'🇺🇾','Spain':'🇪🇸','Cape Verde':'🇨🇻',
+  'Iran':'🇮🇷','New Zealand':'🇳🇿','Belgium':'🇧🇪','Egypt':'🇪🇬',
+  'France':'🇫🇷','Senegal':'🇸🇳','Iraq':'🇮🇶','Norway':'🇳🇴',
+  'Argentina':'🇦🇷','Algeria':'🇩🇿','Austria':'🇦🇹','Jordan':'🇯🇴',
+  'Ghana':'🇬🇭','Panama':'🇵🇦','England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Croatia':'🇭🇷',
+  'Portugal':'🇵🇹','Congo DR':'🇨🇩','Uzbekistan':'🇺🇿','Colombia':'🇨🇴',
+  'Bosnia & Herz.':'🇧🇦','South Korea':'🇰🇷','Ivory Coast':'🇨🇮',
+  'IR Iran':'🇮🇷',
+};
+function flag(t) { return FLAGS[t] || '🏳️'; }
+
+// ============================================================
+// MATCHES DATA (all 72 matches from Excel col G)
+// ============================================================
 const MATCHES = [
-  {no:1,date:"11 Juni",t1:"Mexico",t2:"South Africa"},
-  {no:2,date:"11 Juni",t1:"Korea Republic",t2:"Czechia"},
-  {no:3,date:"12 Juni",t1:"Canada",t2:"Bosnia-Herz."},
-  {no:4,date:"12 Juni",t1:"USA",t2:"Paraguay"},
-  {no:5,date:"13 Juni",t1:"Haiti",t2:"Scotland"},
-  {no:6,date:"13 Juni",t1:"Australia",t2:"Türkiye"},
-  {no:7,date:"13 Juni",t1:"Brazil",t2:"Morocco"},
-  {no:8,date:"13 Juni",t1:"Qatar",t2:"Switzerland"},
-  {no:9,date:"14 Juni",t1:"Côte d'Ivoire",t2:"Ecuador"},
-  {no:10,date:"14 Juni",t1:"Germany",t2:"Curaçao"},
-  {no:11,date:"14 Juni",t1:"Netherlands",t2:"Japan"},
-  {no:12,date:"14 Juni",t1:"Sweden",t2:"Tunisia"},
-  {no:13,date:"15 Juni",t1:"Saudi Arabia",t2:"Uruguay"},
-  {no:14,date:"15 Juni",t1:"Spain",t2:"Cape Verde"},
-  {no:15,date:"15 Juni",t1:"IR Iran",t2:"New Zealand"},
-  {no:16,date:"15 Juni",t1:"Belgium",t2:"Egypt"},
-  {no:17,date:"16 Juni",t1:"France",t2:"Senegal"},
-  {no:18,date:"16 Juni",t1:"Iraq",t2:"Norway"},
-  {no:19,date:"16 Juni",t1:"Argentina",t2:"Algeria"},
-  {no:20,date:"16 Juni",t1:"Austria",t2:"Jordan"},
-  {no:21,date:"17 Juni",t1:"Ghana",t2:"Panama"},
-  {no:22,date:"17 Juni",t1:"England",t2:"Croatia"},
-  {no:23,date:"17 Juni",t1:"Portugal",t2:"Congo DR"},
-  {no:24,date:"17 Juni",t1:"Uzbekistan",t2:"Colombia"},
-  {no:25,date:"18 Juni",t1:"Czechia",t2:"South Africa"},
-  {no:26,date:"18 Juni",t1:"Switzerland",t2:"Bosnia-Herz."},
-  {no:27,date:"18 Juni",t1:"Canada",t2:"Qatar"},
-  {no:28,date:"18 Juni",t1:"Mexico",t2:"Korea Republic"},
-  {no:29,date:"19 Juni",t1:"Brazil",t2:"Haiti"},
-  {no:30,date:"19 Juni",t1:"Scotland",t2:"Morocco"},
-  {no:31,date:"19 Juni",t1:"USA",t2:"Australia"},
-  {no:32,date:"19 Juni",t1:"Türkiye",t2:"Paraguay"},
-  {no:33,date:"20 Juni",t1:"Germany",t2:"Ivory Coast"},
-  {no:34,date:"20 Juni",t1:"Ecuador",t2:"Curaçao"},
-  {no:35,date:"20 Juni",t1:"Netherlands",t2:"Sweden"},
-  {no:36,date:"20 Juni",t1:"Tunisia",t2:"Japan"},
-  {no:37,date:"21 Juni",t1:"Belgium",t2:"Iran"},
-  {no:38,date:"21 Juni",t1:"New Zealand",t2:"Egypt"},
-  {no:39,date:"21 Juni",t1:"Spain",t2:"Saudi Arabia"},
-  {no:40,date:"21 Juni",t1:"Uruguay",t2:"Cape Verde"},
-  {no:41,date:"22 Juni",t1:"France",t2:"Iraq"},
-  {no:42,date:"22 Juni",t1:"Norway",t2:"Senegal"},
-  {no:43,date:"22 Juni",t1:"Argentina",t2:"Austria"},
-  {no:44,date:"22 Juni",t1:"Jordan",t2:"Algeria"},
-  {no:45,date:"23 Juni",t1:"Portugal",t2:"Uzbekistan"},
-  {no:46,date:"23 Juni",t1:"Colombia",t2:"Congo DR"},
-  {no:47,date:"23 Juni",t1:"England",t2:"Ghana"},
-  {no:48,date:"23 Juni",t1:"Panama",t2:"Croatia"},
-  {no:49,date:"24 Juni",t1:"Czechia",t2:"Mexico"},
-  {no:50,date:"24 Juni",t1:"South Africa",t2:"South Korea"},
-  {no:51,date:"24 Juni",t1:"Switzerland",t2:"Canada"},
-  {no:52,date:"24 Juni",t1:"Bosnia & Herz.",t2:"Qatar"},
-  {no:53,date:"25 Juni",t1:"Scotland",t2:"Brazil"},
-  {no:54,date:"25 Juni",t1:"Morocco",t2:"Haiti"},
-  {no:55,date:"25 Juni",t1:"Türkiye",t2:"USA"},
-  {no:56,date:"25 Juni",t1:"Paraguay",t2:"Australia"},
-  {no:57,date:"26 Juni",t1:"Ecuador",t2:"Germany"},
-  {no:58,date:"26 Juni",t1:"Curaçao",t2:"Ivory Coast"},
-  {no:59,date:"26 Juni",t1:"Tunisia",t2:"Netherlands"},
-  {no:60,date:"26 Juni",t1:"Japan",t2:"Sweden"},
-  {no:61,date:"27 Juni",t1:"New Zealand",t2:"Belgium"},
-  {no:62,date:"27 Juni",t1:"Egypt",t2:"Iran"},
-  {no:63,date:"27 Juni",t1:"Uruguay",t2:"Spain"},
-  {no:64,date:"27 Juni",t1:"Cape Verde",t2:"Saudi Arabia"},
-  {no:65,date:"28 Juni",t1:"Norway",t2:"France"},
-  {no:66,date:"28 Juni",t1:"Senegal",t2:"Iraq"},
-  {no:67,date:"28 Juni",t1:"Jordan",t2:"Argentina"},
-  {no:68,date:"28 Juni",t1:"Algeria",t2:"Austria"},
-  {no:69,date:"29 Juni",t1:"Colombia",t2:"Portugal"},
-  {no:70,date:"29 Juni",t1:"Congo DR",t2:"Uzbekistan"},
-  {no:71,date:"29 Juni",t1:"Panama",t2:"England"},
-  {no:72,date:"29 Juni",t1:"Croatia",t2:"Ghana"}
+  {no:1,date:'11 Jun',grup:'Grup A',t1:'Mexico',t2:'South Africa'},
+  {no:2,date:'11 Jun',grup:'Grup A',t1:'Korea Republic',t2:'Czechia'},
+  {no:3,date:'12 Jun',grup:'Grup B',t1:'Canada',t2:'Bosnia-Herz.'},
+  {no:4,date:'12 Jun',grup:'Grup D',t1:'USA',t2:'Paraguay'},
+  {no:5,date:'13 Jun',grup:'Grup C',t1:'Haiti',t2:'Scotland'},
+  {no:6,date:'13 Jun',grup:'Grup D',t1:'Australia',t2:'Türkiye'},
+  {no:7,date:'13 Jun',grup:'Grup C',t1:'Brazil',t2:'Morocco'},
+  {no:8,date:'13 Jun',grup:'Grup B',t1:'Qatar',t2:'Switzerland'},
+  {no:9,date:'14 Jun',grup:'Grup E',t1:"Côte d'Ivoire",t2:'Ecuador'},
+  {no:10,date:'14 Jun',grup:'Grup E',t1:'Germany',t2:'Curaçao'},
+  {no:11,date:'14 Jun',grup:'Grup F',t1:'Netherlands',t2:'Japan'},
+  {no:12,date:'14 Jun',grup:'Grup F',t1:'Sweden',t2:'Tunisia'},
+  {no:13,date:'15 Jun',grup:'Grup H',t1:'Saudi Arabia',t2:'Uruguay'},
+  {no:14,date:'15 Jun',grup:'Grup H',t1:'Spain',t2:'Cape Verde'},
+  {no:15,date:'15 Jun',grup:'Grup G',t1:'Iran',t2:'New Zealand'},
+  {no:16,date:'15 Jun',grup:'Grup G',t1:'Belgium',t2:'Egypt'},
+  {no:17,date:'16 Jun',grup:'Grup I',t1:'France',t2:'Senegal'},
+  {no:18,date:'16 Jun',grup:'Grup I',t1:'Iraq',t2:'Norway'},
+  {no:19,date:'16 Jun',grup:'Grup J',t1:'Argentina',t2:'Algeria'},
+  {no:20,date:'16 Jun',grup:'Grup J',t1:'Austria',t2:'Jordan'},
+  {no:21,date:'17 Jun',grup:'Grup L',t1:'Ghana',t2:'Panama'},
+  {no:22,date:'17 Jun',grup:'Grup L',t1:'England',t2:'Croatia'},
+  {no:23,date:'17 Jun',grup:'Grup K',t1:'Portugal',t2:'Congo DR'},
+  {no:24,date:'17 Jun',grup:'Grup K',t1:'Uzbekistan',t2:'Colombia'},
+  {no:25,date:'18 Jun',grup:'Grup A',t1:'Czechia',t2:'South Africa'},
+  {no:26,date:'18 Jun',grup:'Grup B',t1:'Switzerland',t2:'Bosnia-Herz.'},
+  {no:27,date:'18 Jun',grup:'Grup B',t1:'Canada',t2:'Qatar'},
+  {no:28,date:'18 Jun',grup:'Grup A',t1:'Mexico',t2:'Korea Republic'},
+  {no:29,date:'19 Jun',grup:'Grup C',t1:'Brazil',t2:'Haiti'},
+  {no:30,date:'19 Jun',grup:'Grup C',t1:'Scotland',t2:'Morocco'},
+  {no:31,date:'19 Jun',grup:'Grup D',t1:'USA',t2:'Australia'},
+  {no:32,date:'19 Jun',grup:'Grup D',t1:'Türkiye',t2:'Paraguay'},
+  {no:33,date:'20 Jun',grup:'Grup E',t1:'Germany',t2:"Côte d'Ivoire"},
+  {no:34,date:'20 Jun',grup:'Grup E',t1:'Ecuador',t2:'Curaçao'},
+  {no:35,date:'20 Jun',grup:'Grup F',t1:'Netherlands',t2:'Sweden'},
+  {no:36,date:'20 Jun',grup:'Grup F',t1:'Tunisia',t2:'Japan'},
+  {no:37,date:'21 Jun',grup:'Grup G',t1:'Belgium',t2:'Iran'},
+  {no:38,date:'21 Jun',grup:'Grup G',t1:'New Zealand',t2:'Egypt'},
+  {no:39,date:'21 Jun',grup:'Grup H',t1:'Spain',t2:'Saudi Arabia'},
+  {no:40,date:'21 Jun',grup:'Grup H',t1:'Uruguay',t2:'Cape Verde'},
+  {no:41,date:'22 Jun',grup:'Grup I',t1:'France',t2:'Iraq'},
+  {no:42,date:'22 Jun',grup:'Grup I',t1:'Norway',t2:'Senegal'},
+  {no:43,date:'22 Jun',grup:'Grup J',t1:'Argentina',t2:'Austria'},
+  {no:44,date:'22 Jun',grup:'Grup J',t1:'Jordan',t2:'Algeria'},
+  {no:45,date:'23 Jun',grup:'Grup K',t1:'Portugal',t2:'Uzbekistan'},
+  {no:46,date:'23 Jun',grup:'Grup K',t1:'Colombia',t2:'Congo DR'},
+  {no:47,date:'23 Jun',grup:'Grup L',t1:'England',t2:'Ghana'},
+  {no:48,date:'23 Jun',grup:'Grup L',t1:'Panama',t2:'Croatia'},
+  {no:49,date:'24 Jun',grup:'Grup A',t1:'Czechia',t2:'Mexico'},
+  {no:50,date:'24 Jun',grup:'Grup A',t1:'South Africa',t2:'Korea Republic'},
+  {no:51,date:'24 Jun',grup:'Grup B',t1:'Switzerland',t2:'Canada'},
+  {no:52,date:'24 Jun',grup:'Grup B',t1:'Bosnia-Herz.',t2:'Qatar'},
+  {no:53,date:'25 Jun',grup:'Grup C',t1:'Scotland',t2:'Brazil'},
+  {no:54,date:'25 Jun',grup:'Grup C',t1:'Morocco',t2:'Haiti'},
+  {no:55,date:'25 Jun',grup:'Grup D',t1:'Türkiye',t2:'USA'},
+  {no:56,date:'25 Jun',grup:'Grup D',t1:'Paraguay',t2:'Australia'},
+  {no:57,date:'26 Jun',grup:'Grup E',t1:'Ecuador',t2:'Germany'},
+  {no:58,date:'26 Jun',grup:'Grup E',t1:'Curaçao',t2:"Côte d'Ivoire"},
+  {no:59,date:'26 Jun',grup:'Grup F',t1:'Tunisia',t2:'Netherlands'},
+  {no:60,date:'26 Jun',grup:'Grup F',t1:'Japan',t2:'Sweden'},
+  {no:61,date:'27 Jun',grup:'Grup G',t1:'New Zealand',t2:'Belgium'},
+  {no:62,date:'27 Jun',grup:'Grup G',t1:'Egypt',t2:'Iran'},
+  {no:63,date:'27 Jun',grup:'Grup H',t1:'Uruguay',t2:'Spain'},
+  {no:64,date:'27 Jun',grup:'Grup H',t1:'Cape Verde',t2:'Saudi Arabia'},
+  {no:65,date:'28 Jun',grup:'Grup I',t1:'Norway',t2:'France'},
+  {no:66,date:'28 Jun',grup:'Grup I',t1:'Senegal',t2:'Iraq'},
+  {no:67,date:'28 Jun',grup:'Grup J',t1:'Jordan',t2:'Argentina'},
+  {no:68,date:'28 Jun',grup:'Grup J',t1:'Algeria',t2:'Austria'},
+  {no:69,date:'29 Jun',grup:'Grup K',t1:'Colombia',t2:'Portugal'},
+  {no:70,date:'29 Jun',grup:'Grup K',t1:'Congo DR',t2:'Uzbekistan'},
+  {no:71,date:'29 Jun',grup:'Grup L',t1:'Panama',t2:'England'},
+  {no:72,date:'29 Jun',grup:'Grup L',t1:'Croatia',t2:'Ghana'},
 ];
 
-// picks[player][matchIndex] = 1 jika pemain pick benar, 0 jika salah
-// Data ini sudah fix dari file Excel — hanya skor yang perlu diupdate
+// ============================================================
+// PICKS (dari Excel — fixed)
+// ============================================================
 const PICKS = {
-  "Enrico":[0,1,0,1,1,0,0,1,0,1,1,1,0,0,1,0,1,1,1,1,0,1,0,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Dwi":[1,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Bayu":[1,0,0,1,1,1,0,0,1,1,0,1,0,0,0,0,1,1,1,1,0,1,0,0,0,1,1,0,1,0,1,0,1,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Bryan":[0,1,0,1,1,0,0,0,0,1,0,0,0,0,0,0,1,1,1,1,0,0,0,1,0,1,1,1,1,0,1,0,1,0,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Putu":[1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,1,0,1,1,1,1,0,1,0,1,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Anton":[1,0,1,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,1,0,1,0,1,0,1,0,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Pak Yo":[1,0,1,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Diana":[1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,1,1,1,1,1,1,0,0,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Chris":[1,0,0,1,1,0,0,0,1,1,0,1,0,0,0,0,1,1,1,1,1,0,0,1,1,0,1,0,1,0,1,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Charlie":[1,1,0,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Gilang":[1,1,0,0,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,1,1,1,1,0,1,1,0,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Rajib":[1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,0,0,1,1,0,1,1,0,1,1,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Sidra":[1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,1,1,1,1,0,1,0,1,0,1,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Mario":[1,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Tri Wardoyo":[0,0,0,1,1,0,0,0,1,1,1,1,0,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Raihan":[0,1,0,1,1,1,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Latif":[1,1,0,1,1,0,1,0,0,1,1,1,0,0,0,0,1,1,1,1,1,0,0,1,0,1,1,0,1,0,0,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Rustam":[1,0,0,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,1,0,1,0,1,1,1,1,1,1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Istie":[0,1,1,1,1,0,1,1,0,1,1,1,1,0,0,0,1,1,1,1,0,0,0,0,1,0,0,0,1,0,0,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Tika":[1,0,0,1,1,1,0,1,0,1,0,1,0,0,0,0,1,0,1,1,1,0,0,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Nike":[1,1,1,0,1,1,0,0,0,1,0,1,0,0,0,0,1,0,1,0,0,1,0,1,1,0,0,0,1,1,0,1,1,0,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Ikiw":[0,0,0,1,0,1,0,1,0,1,0,0,1,0,0,0,1,0,1,1,0,0,0,0,0,1,0,0,0,0,1,0,1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Eja":[0,1,1,0,1,0,0,0,0,1,0,1,1,0,0,0,1,1,1,1,1,1,0,1,0,1,0,0,1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Vando":[1,1,1,0,1,0,1,0,1,1,0,1,0,0,0,0,1,1,1,0,1,1,0,1,0,1,1,0,1,0,1,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Robi":[1,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+  "Enrico":[0,1,0,1,1,0,0,1,0,1,1,1,0,0,1,0,1,1,1,1,0,1,0,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Dwi":[1,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,1,1,0,1,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Bayu":[1,0,0,1,1,1,0,0,1,1,0,1,0,0,0,0,1,1,1,1,0,1,0,0,0,1,1,0,1,0,1,0,1,1,0,1,0,1,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Bryan":[0,1,0,1,1,0,0,0,0,1,0,0,0,0,0,0,1,1,1,1,0,0,0,1,0,1,1,1,1,0,1,0,1,0,1,1,0,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Putu":[1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,1,0,1,1,1,1,0,1,0,1,0,0,1,0,1,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Anton":[1,0,1,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,1,0,1,0,1,0,1,0,1,1,0,0,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Pak Yo":[1,0,1,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,0,1,0,1,1,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Diana":[1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,1,1,1,1,1,1,0,0,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Chris":[1,0,0,1,1,0,0,0,1,1,0,1,0,0,0,0,1,1,1,1,1,0,0,1,1,0,1,0,1,0,1,0,1,0,1,1,0,1,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Charlie":[1,1,0,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1,0,1,0,1,1,0,1,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Gilang":[1,1,0,0,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,1,1,1,1,0,1,1,0,0,1,0,1,1,0,1,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Rajib":[1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,0,0,1,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Sidra":[1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,1,1,1,1,0,1,0,1,0,1,0,0,1,1,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Mario":[1,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,0,1,0,1,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Tri Wardoyo":[0,0,0,1,1,0,0,0,1,1,1,1,0,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,0,0,1,0,0,1,0,1,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Raihan":[0,1,0,1,1,1,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,0,1,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Latif":[1,1,0,1,1,0,1,0,0,1,1,1,0,0,0,0,1,1,1,1,1,0,0,1,0,1,1,0,1,0,0,0,1,0,1,1,0,1,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Rustam":[1,0,0,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,1,0,1,0,1,1,1,1,1,1,1,0,0,1,0,0,1,0,1,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Istie":[0,1,1,1,1,0,1,1,0,1,1,1,1,0,0,0,1,1,1,1,0,0,0,0,1,0,0,0,1,0,0,1,1,0,1,1,1,1,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Tika":[1,0,0,1,1,1,0,1,0,1,0,1,0,0,0,0,1,0,1,1,1,0,0,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Nike":[1,1,1,0,1,1,0,0,0,1,0,1,0,0,0,0,1,0,1,0,0,1,0,1,1,0,0,0,1,1,0,1,1,0,1,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Ikiw":[0,0,0,1,0,1,0,1,0,1,0,0,1,0,0,0,1,0,1,1,0,0,0,0,0,1,0,0,0,0,1,0,1,1,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Eja":[0,1,1,0,1,0,0,0,0,1,0,1,1,0,0,0,1,1,1,1,1,1,0,1,0,1,0,0,1,1,0,0,1,0,0,1,0,1,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Vando":[1,1,1,0,1,0,1,0,1,1,0,1,0,0,0,0,1,1,1,0,1,1,0,1,0,1,1,0,1,0,1,0,1,0,1,1,0,1,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "Robi":[1,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,0,1,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 };
-
 const PLAYER_NAMES = Object.keys(PICKS);
 
-// Skor setiap match: [skor_tim1, skor_tim2] atau null kalau belum
-// Diisi dari input user
+// Pre-filled scores match 1-44
 let scores = new Array(72).fill(null);
+scores[0]=[2,0];
+scores[1]=[2,1];
+scores[2]=[1,1];
+scores[3]=[4,1];
+scores[4]=[0,1];
+scores[5]=[2,0];
+scores[6]=[1,1];
+scores[7]=[1,1];
+scores[8]=[1,0];
+scores[9]=[7,1];
+scores[10]=[2,2];
+scores[11]=[5,1];
+scores[12]=[1,1];
+scores[13]=[0,0];
+scores[14]=[2,2];
+scores[15]=[1,1];
+scores[16]=[3,1];
+scores[17]=[1,4];
+scores[18]=[3,0];
+scores[19]=[3,1];
+scores[20]=[1,0];
+scores[21]=[4,2];
+scores[22]=[1,1];
+scores[23]=[1,3];
+scores[24]=[1,1];
+scores[25]=[4,1];
+scores[26]=[6,0];
+scores[27]=[1,0];
+scores[28]=[3,0];
+scores[29]=[0,1];
+scores[30]=[2,0];
+scores[31]=[0,1];
+scores[32]=[2,1];
+scores[33]=[0,0];
+scores[34]=[5,1];
+scores[35]=[0,4];
+scores[36]=[0,0];
+scores[37]=[1,3];
+scores[38]=[4,0];
+scores[39]=[2,2];
+scores[40]=[3,0];
+scores[41]=[3,2];
+scores[42]=[2,0];
+scores[43]=[1,2];
 
-// Pre-fill skor match 1-20 yang sudah selesai
-const DONE_SCORES = [
-  [2,0],[2,1],[1,1],[4,1],[0,1],[2,0],[1,1],[1,1],[1,0],[7,1],[2,2],[5,1],[1,1],[0,0],[2,2],[1,1],[3,1],[1,4],[3,0],[3,1],[1,0],[4,2],[1,1],[1,3],[1,1],[4,1],[6,0],[1,0],[3,0],[0,1],[2,0],[0,1],[2,1],[0,0],[5,1],[0,4],[0,0],[1,3],[4,0],[2,2]
-];
-DONE_SCORES.forEach((s,i) => { scores[i] = s; });
+[[2,0],[2,1],[1,1],[4,1],[0,1],[2,0],[1,1],[1,1],[1,0],[7,1],[2,2],[5,1],[1,1],[0,0],[2,2],[1,1],[3,1],[1,4],[3,0],[3,1],[1,0],[4,2],[1,1],[1,3],[1,1],[4,1],[6,0],[1,0],[3,0],[0,1],[2,0],[0,1],[2,1],[0,0],[5,1],[0,4],[0,0],[1,3],[4,0],[2,2],[3,0],[3,2],[2,0],[1,0]].forEach((s,i)=>scores[i]=s);
 
-const PALETTE = [
-  '#4e8ef7','#f75c5c','#34c97a','#f5c842','#a78bfa',
-  '#f97316','#06b6d4','#ec4899','#84cc16','#94a3b8',
-  '#fb923c','#22d3ee','#f43f5e','#a3e635','#c084fc',
-  '#38bdf8','#fbbf24','#4ade80','#f87171','#818cf8',
-  '#fdba74','#67e8f9','#f9a8d4','#bef264','#e879f9'
-];
+const PALETTE=['#4e8ef7','#f75c5c','#34c97a','#f5c842','#a78bfa','#f97316','#06b6d4','#ec4899','#84cc16','#94a3b8','#fb923c','#22d3ee','#f43f5e','#a3e635','#c084fc','#38bdf8','#fbbf24','#4ade80','#f87171','#818cf8','#fdba74','#67e8f9','#f9a8d4','#bef264','#e879f9'];
+let hiddenPlayers=new Set(), currentFilter='all', myChart=null;
 
-let hiddenPlayers = new Set();
-let currentFilter = 'all';
-let myChart = null;
+// ============================================================
+// TAB SWITCH
+// ============================================================
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(tab==='groups') renderGroups();
+}
 
-// ---------- Compute cumulative scores ----------
-function computeCumulative() {
-  const completed = scores.reduce((n,s,i) => s !== null ? i+1 : n, 0);
-  const result = {};
-  PLAYER_NAMES.forEach(name => {
-    let total = 0;
-    const cum = [];
-    for (let i = 0; i < completed; i++) {
-      if (scores[i] !== null && PICKS[name][i] === 1) total++;
-      cum.push(total);
-    }
-    result[name] = { cum, total };
+// ============================================================
+// SIDEBAR
+
+function toggleScore(i){}
+
+function updateScore(i){}
+
+// ============================================================
+// COMPUTE CUMULATIVE (leaderboard chart)
+// ============================================================
+function computeCumulative(){
+  const completed=scores.reduce((n,s,i)=>s!==null?i+1:n,0);
+  const result={};
+  PLAYER_NAMES.forEach(name=>{
+    let total=0;const cum=[];
+    for(let i=0;i<completed;i++){if(scores[i]!==null&&PICKS[name][i]===1)total++;cum.push(total);}
+    result[name]={cum,total};
   });
-  return { result, completed };
+  return{result,completed};
 }
 
-// ---------- Determine winner pick for a match ----------
-function getWinnerSide(s1, s2) {
-  if (s1 === null || s2 === null) return null;
-  if (s1 > s2) return 'tim1';
-  if (s2 > s1) return 'tim2';
-  return 'draw';
-}
-
-// ---------- Sidebar: read-only score table ----------
-function buildSidebar() {
-  const sb = document.getElementById('sidebar');
-  let html = '';
-  let lastDate = '';
-  MATCHES.forEach((m, i) => {
-    if (m.date !== lastDate) {
-      if (lastDate) html += '</div>';
-      html += `<div class="date-group"><div class="date-label">${m.date}</div>`;
-      lastDate = m.date;
-    }
-    const s = scores[i];
-    const done = s !== null;
-    const hasil = done
-      ? (s[0] > s[1] ? `✅ ${m.t1}` : s[1] > s[0] ? `✅ ${m.t2}` : '🤝 Seri')
-      : '';
-    html += `
-    <div class="match-item" style="cursor:default;">
-      <div class="match-header" style="cursor:default;">
-        <span class="match-num">M${m.no}</span>
-        <span class="match-teams">${m.t1} vs ${m.t2}</span>
-        <span class="match-status ${done ? 'status-done' : 'status-pending'}">
-          ${done ? `${s[0]} — ${s[1]}` : '⏳'}
-        </span>
-      </div>
-      ${done ? `<div style="font-size:10px;color:#4a9;padding:2px 10px 6px 32px;">${hasil}</div>` : ''}
-    </div>`;
-  });
-  html += '</div>';
-  sb.innerHTML = html;
-}
-
-function toggleScore(i) { /* disabled */ }
-function updateScore(i) { /* disabled */
-}
-
-// ---------- Filter ----------
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+// ============================================================
+// FILTER
+// ============================================================
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   render();
 }
 
-// ---------- Render ----------
-function render() {
-  const { result, completed } = computeCumulative();
-  if (completed === 0) return;
+// ============================================================
+// RENDER CHART TAB
+// ============================================================
+function render(){
+  const{result,completed}=computeCumulative();
+  if(completed===0)return;
+  document.getElementById('chart-sub').textContent=completed+' match selesai';
+  const sorted=PLAYER_NAMES.slice().sort((a,b)=>result[b].total-result[a].total);
+  let visible=sorted;
+  if(currentFilter==='top5') visible=sorted.slice(0,5);
+  if(currentFilter==='bottom5') visible=sorted.slice(-5);
+  const maxPts=result[sorted[0]].total;
 
-  document.getElementById('chart-sub').textContent = completed + ' match selesai';
+  document.getElementById('stats-row').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Pemimpin</div><div class="stat-val">${sorted[0]}</div><div class="stat-sub">${result[sorted[0]].total} poin dari ${completed} match</div></div>
+    <div class="stat-card"><div class="stat-label">Match selesai</div><div class="stat-val">${completed}<span style="font-size:13px;color:#4a6080"> / 72</span></div><div class="stat-sub">${72-completed} tersisa</div></div>
+    <div class="stat-card"><div class="stat-label">Rata-rata</div><div class="stat-val">${(PLAYER_NAMES.reduce((s,n)=>s+result[n].total,0)/PLAYER_NAMES.length).toFixed(1)}</div><div class="stat-sub">poin per peserta</div></div>`;
 
-  // Sort by score
-  const sorted = PLAYER_NAMES.slice().sort((a,b) => result[b].total - result[a].total);
-
-  // Apply filter
-  let visible = sorted;
-  if (currentFilter === 'top5') visible = sorted.slice(0,5);
-  if (currentFilter === 'bottom5') visible = sorted.slice(-5);
-
-  // Stats
-  const leader = sorted[0];
-  const maxPts = result[leader].total;
-  document.getElementById('stats-row').innerHTML = `
-    <div class="stat-card">
-      <div class="stat-label">Pemimpin</div>
-      <div class="stat-val">${leader}</div>
-      <div class="stat-sub">${maxPts} poin dari ${completed} match</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Match selesai</div>
-      <div class="stat-val">${completed}<span style="font-size:13px;color:#4a6080"> / 72</span></div>
-      <div class="stat-sub">${72-completed} match tersisa</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Peserta</div>
-      <div class="stat-val">${PLAYER_NAMES.length}</div>
-      <div class="stat-sub">Avg ${(PLAYER_NAMES.reduce((s,n)=>s+result[n].total,0)/PLAYER_NAMES.length).toFixed(1)} poin</div>
-    </div>`;
-
-  // Chart datasets
-  const labels = Array.from({length: completed}, (_,i) => 'M'+(i+1));
-  const datasets = visible.map((name,i) => {
-    const pidx = PLAYER_NAMES.indexOf(name);
-    const color = PALETTE[pidx % PALETTE.length];
-    return {
-      label: name,
-      data: result[name].cum,
-      borderColor: color,
-      backgroundColor: color+'33',
-      borderWidth: hiddenPlayers.has(name) ? 0 : 2,
-      pointRadius: completed <= 20 ? 4 : 2,
-      pointHoverRadius: 7,
-      fill: false,
-      tension: 0.3,
-      hidden: hiddenPlayers.has(name)
-    };
+  const labels=Array.from({length:completed},(_,i)=>'M'+(i+1));
+  const datasets=visible.map(name=>{
+    const pidx=PLAYER_NAMES.indexOf(name);
+    const color=PALETTE[pidx%PALETTE.length];
+    return{label:name,data:result[name].cum,borderColor:color,backgroundColor:color+'33',borderWidth:hiddenPlayers.has(name)?0:2,pointRadius:completed<=24?4:2,pointHoverRadius:7,fill:false,tension:.3,hidden:hiddenPlayers.has(name)};
   });
 
-  if (!myChart) {
-    myChart = new Chart(document.getElementById('myChart'), {
-      type: 'line',
-      data: { labels, datasets },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#0d1528',
-            borderColor: '#1e2d4a',
-            borderWidth: 1,
-            titleColor: '#c8d4f0',
-            bodyColor: '#8090b0',
-            callbacks: {
-              title: items => {
-                const idx = items[0].dataIndex;
-                const m = MATCHES[idx];
-                const s = scores[idx];
-                return `M${m.no}: ${m.t1} ${s?s[0]+'-'+s[1]:''} ${m.t2}`;
-              },
-              label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y} poin`,
-              afterBody: items => {
-                const idx = items[0].dataIndex;
-                const top = visible.filter(n=>!hiddenPlayers.has(n)).sort((a,b)=>result[b].cum[idx]-result[a].cum[idx]).slice(0,3);
-                return ['', '  Top 3:', ...top.map((n,i)=>`  ${['🥇','🥈','🥉'][i]} ${n}: ${result[n].cum[idx]}`)];
-              }
-            },
-            itemSort: (a,b) => b.parsed.y - a.parsed.y
-          }
-        },
-        scales: {
-          x: { ticks: { color: '#3d5278', font:{size:10} }, grid: { color: '#0f1a2e' } },
-          y: { min:0, ticks: { color: '#3d5278', font:{size:10}, stepSize:2 }, grid: { color: '#111a30' } }
-        }
-      }
+  if(!myChart){
+    myChart=new Chart(document.getElementById('myChart'),{
+      type:'line',data:{labels,datasets},
+      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+        plugins:{legend:{display:false},tooltip:{backgroundColor:'#0d1528',borderColor:'#1e2d4a',borderWidth:1,titleColor:'#c8d4f0',bodyColor:'#8090b0',
+          callbacks:{
+            title:items=>{const idx=items[0].dataIndex;const m=MATCHES[idx];const s=scores[idx];return`M${m.no} ${m.grup}: ${m.t1} ${s?s[0]+'-'+s[1]:''} ${m.t2}`;},
+            label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y} poin`,
+            afterBody:items=>{const idx=items[0].dataIndex;const top=visible.filter(n=>!hiddenPlayers.has(n)).sort((a,b)=>result[b].cum[idx]-result[a].cum[idx]).slice(0,3);return['','  Top 3:',...top.map((n,i)=>`  ${['🥇','🥈','🥉'][i]} ${n}: ${result[n].cum[idx]}`)];},
+          },itemSort:(a,b)=>b.parsed.y-a.parsed.y}},
+        scales:{x:{ticks:{color:'#3d5278',font:{size:10}},grid:{color:'#0f1a2e'}},y:{min:0,ticks:{color:'#3d5278',font:{size:10},stepSize:2},grid:{color:'#111a30'}}}}
     });
   } else {
-    myChart.data.labels = labels;
-    myChart.data.datasets = datasets;
-    myChart.update();
+    myChart.data.labels=labels;myChart.data.datasets=datasets;myChart.update();
   }
 
-  // Legend
-  const legEl = document.getElementById('legend');
-  legEl.innerHTML = visible.map(name => {
-    const pidx = PLAYER_NAMES.indexOf(name);
-    const color = PALETTE[pidx % PALETTE.length];
-    return `<span class="leg ${hiddenPlayers.has(name)?'hidden':''}" onclick="togglePlayer('${name}')">
-      <span class="leg-dot" style="background:${color}"></span>${name}<span class="leg-score">${result[name].total}</span>
-    </span>`;
+  document.getElementById('legend').innerHTML=visible.map(name=>{
+    const pidx=PLAYER_NAMES.indexOf(name);const color=PALETTE[pidx%PALETTE.length];
+    return`<span class="leg ${hiddenPlayers.has(name)?'hidden':''}" onclick="togglePlayer('${name}')"><span class="leg-dot" style="background:${color}"></span>${name}<span class="leg-score">${result[name].total}</span></span>`;
   }).join('');
 
-  // Leaderboard
-  const lbEl = document.getElementById('lb-list');
-  lbEl.innerHTML = sorted.map((name,i) => {
-    const pidx = PLAYER_NAMES.indexOf(name);
-    const color = PALETTE[pidx % PALETTE.length];
-    const pts = result[name].total;
-    const pct = maxPts > 0 ? (pts/maxPts*100) : 0;
-    const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
-    const rankLabel = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
-    return `<div class="lb-row">
-      <span class="lb-rank ${rankClass}">${rankLabel}</span>
-      <span class="lb-name">${name}</span>
-      <div class="lb-bar-wrap"><div class="lb-bar" style="width:${pct}%;background:${color}"></div></div>
-      <span class="lb-pts">${pts}</span>
-    </div>`;
+  document.getElementById('lb-list').innerHTML=sorted.map((name,i)=>{
+    const pidx=PLAYER_NAMES.indexOf(name);const color=PALETTE[pidx%PALETTE.length];
+    const pts=result[name].total;const pct=maxPts>0?(pts/maxPts*100):0;
+    const rc=i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    const rl=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+    return`<div class="lb-row"><span class="lb-rank ${rc}">${rl}</span><span class="lb-name">${name}</span><div class="lb-bar-wrap"><div class="lb-bar" style="width:${pct}%;background:${color}"></div></div><span class="lb-pts">${pts}</span></div>`;
   }).join('');
 }
 
-function togglePlayer(name) {
-  if (hiddenPlayers.has(name)) hiddenPlayers.delete(name);
-  else hiddenPlayers.add(name);
+function togglePlayer(name){
+  if(hiddenPlayers.has(name))hiddenPlayers.delete(name);else hiddenPlayers.add(name);
   render();
 }
 
-// Init
+// ============================================================
+// GROUP STANDINGS
+// ============================================================
+function computeStandings(){
+  const teamStats={};
+  // Init all teams
+  MATCHES.forEach(m=>{
+    [m.t1,m.t2].forEach(t=>{
+      if(!teamStats[t]) teamStats[t]={mp:0,w:0,d:0,l:0,gf:0,ga:0,pts:0,grup:m.grup};
+    });
+  });
+  // Compute from completed matches
+  MATCHES.forEach((m,i)=>{
+    const s=scores[i];
+    if(s===null) return;
+    const [s1,s2]=s;
+    // team1
+    teamStats[m.t1].mp++;teamStats[m.t1].gf+=s1;teamStats[m.t1].ga+=s2;
+    // team2
+    teamStats[m.t2].mp++;teamStats[m.t2].gf+=s2;teamStats[m.t2].ga+=s1;
+    if(s1>s2){teamStats[m.t1].w++;teamStats[m.t1].pts+=3;teamStats[m.t2].l++;}
+    else if(s2>s1){teamStats[m.t2].w++;teamStats[m.t2].pts+=3;teamStats[m.t1].l++;}
+    else{teamStats[m.t1].d++;teamStats[m.t1].pts++;teamStats[m.t2].d++;teamStats[m.t2].pts++;}
+  });
+  // Group by grup
+  const groups={};
+  Object.entries(teamStats).forEach(([team,stat])=>{
+    if(!groups[stat.grup]) groups[stat.grup]=[];
+    groups[stat.grup].push({team,...stat});
+  });
+  // Sort each group: pts desc, GD desc, GF desc
+  Object.values(groups).forEach(arr=>arr.sort((a,b)=>{
+    if(b.pts!==a.pts) return b.pts-a.pts;
+    const gdA=a.gf-a.ga, gdB=b.gf-b.ga;
+    if(gdB!==gdA) return gdB-gdA;
+    return b.gf-a.gf;
+  }));
+  return groups;
+}
+
+function renderGroups(){
+  const groups=computeStandings();
+  const grid=document.getElementById('groups-grid');
+  grid.innerHTML=Object.entries(groups).sort((a,b)=>a[0].localeCompare(b[0])).map(([grup,teams])=>{
+    const rows=teams.map((t,i)=>{
+      const gd=t.gf-t.ga;
+      const posClass=`pos-${i+1}`;
+      const qualClass=i<2?'qualify':'';
+      return`<tr class="${qualClass}">
+        <td><div class="team-cell"><span class="pos-badge ${posClass}">${i+1}</span><span class="team-flag">${flag(t.team)}</span><span class="team-name">${t.team}</span></div></td>
+        <td>${t.mp}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td>
+        <td>${t.gf}:${t.ga}</td>
+        <td style="color:${gd>0?'#3dbd6a':gd<0?'#f75c5c':'#8090b0'}">${gd>0?'+':''}${gd}</td>
+        <td class="pts-cell">${t.pts}</td>
+      </tr>`;
+    }).join('');
+    return`<div class="group-card">
+      <div class="group-card-header">⚽ ${grup}</div>
+      <table class="group-table">
+        <thead><tr><th>Tim</th><th>M</th><th>W</th><th>D</th><th>L</th><th>GF:GA</th><th>GD</th><th>Pts</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function buildSidebar(){
+  const sb=document.getElementById('sidebar');
+  let html='';let lastDate='';
+  MATCHES.forEach((m,i)=>{
+    if(m.date!==lastDate){if(lastDate)html+='</div>';html+=`<div class="date-group"><div class="date-label">${m.date}</div>`;lastDate=m.date;}
+    const s=scores[i],done=s!==null;
+    const hasil=done?(s[0]>s[1]?`✅ ${m.t1.split(' ')[0]}`:s[1]>s[0]?`✅ ${m.t2.split(' ')[0]}`:'🤝 Seri'):'';
+    html+=`<div class="match-item"><div class="match-header" style="cursor:default"><span class="match-num">M${m.no}</span><div class="match-flags"><span class="flag">${flag(m.t1)}</span><span class="match-vs">vs</span><span class="flag">${flag(m.t2)}</span><span class="match-name">${m.t1} vs ${m.t2}</span></div><span class="match-status ${done?'status-done':'status-pending'}">${done?s[0]+' — '+s[1]:'⏳'}</span></div>${done?`<div style="font-size:10px;color:#3dbd6a;padding:2px 12px 5px 36px;">${hasil}</div>`:''}</div>`;
+  });
+  html+='</div>';sb.innerHTML=html;
+}
+function toggleScore(i){}
+function updateScore(i){}
 buildSidebar();
 render();
 </script>
