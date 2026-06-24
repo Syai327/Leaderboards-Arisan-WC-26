@@ -67,10 +67,6 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0f1e; colo
 
 /* Leaderboard */
 
-/* Filter btns */
-.filter-row { display: flex; gap: 6px; }
-.filter-btn { background: #111a30; border: 1px solid #1e2d4a; border-radius: 5px; color: #6b7fa3; font-size: 11px; padding: 4px 10px; cursor: pointer; }
-.filter-btn.active { background: #1a3560; border-color: #2a5090; color: #7ab0f0; }
 
 /* ===== GROUP STANDINGS TAB ===== */
 .groups-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; padding: 20px; }
@@ -157,11 +153,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0f1e; colo
           <div style="font-size:15px;font-weight:600;color:#c8d4f0;">Perjalanan Poin per Match</div>
           <div style="font-size:12px;color:#4a6080;margin-top:2px;" id="chart-sub">— match selesai</div>
         </div>
-        <div class="filter-row">
-          <button class="filter-btn active" onclick="setFilter('all',this)">Semua</button>
-          <button class="filter-btn" onclick="setFilter('top5',this)">Top 5</button>
-          <button class="filter-btn" onclick="setFilter('bottom5',this)">Bottom 5</button>
-        </div>
+        
       </div>
       <div class="pred-panel">
   <h2>🔮 Analisis &amp; Prediksi</h2>
@@ -171,32 +163,22 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0f1e; colo
     <div class="pred-card">
       <div class="pred-icon">🥇</div>
       <div style="flex:1">
-        <div class="pred-name">Charlie — 29 poin</div>
-        <div class="pred-desc">Pemimpin sementara, konsisten di setiap matchday. Hanya 6 contrarian picks di sisa match — strategi solid yang susah dikejar kalau mayoritas berjalan sesuai prediksi.</div>
-        <div class="pred-stat-row"><span class="pred-stat">44 match done</span><span class="pred-stat">6 contrarian</span><span class="pred-stat">Gap: 0</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:82%"></div></div>
+        <div class="pred-name">Charlie — 32 poin</div>
+        <div class="pred-desc">Masih kokoh di puncak setelah 48 match. Hanya 6 contrarian picks di sisa 24 match — paling solid di antara semua pemain. Max possible 56. Butuh banyak kejutan untuk bisa digeser.</div>
+        <div class="pred-stat-row"><span class="pred-stat">Max 56/72</span><span class="pred-stat">6 contrarian</span><span class="pred-stat">Gap: 0</span></div>
+        <div class="pred-meter"><div class="pred-meter-fill" style="width:85%"></div></div>
       </div>
       <span class="pred-badge badge-hot">Favorit</span>
     </div>
     <div class="pred-card">
       <div class="pred-icon">🥈</div>
       <div style="flex:1">
-        <div class="pred-name">Enrico &amp; Raihan — 28 poin</div>
-        <div class="pred-desc">1 poin di belakang Charlie. Raihan (4 contrarian) dan Enrico (5 contrarian) main paling aman di grup atas — bisa nyalip diam-diam kalau Charlie kesandung 1-2 match.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Gap: 1</span><span class="pred-stat">4-5 contrarian</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:79%"></div></div>
+        <div class="pred-name">Enrico &amp; Raihan — 31 poin</div>
+        <div class="pred-desc">1 poin di belakang Charlie. Raihan cuma punya 4 contrarian picks — paling aman di grup ini. Enrico juga 5 contrarian. Keduanya bisa nyalip kalau Charlie tersandung 1-2 match di sisa grup.</div>
+        <div class="pred-stat-row"><span class="pred-stat">Max 55/72</span><span class="pred-stat">4-5 contrarian</span><span class="pred-stat">Gap: 1</span></div>
+        <div class="pred-meter"><div class="pred-meter-fill" style="width:82%"></div></div>
       </div>
       <span class="pred-badge badge-safe">Konsisten</span>
-    </div>
-    <div class="pred-card">
-      <div class="pred-icon">🥉</div>
-      <div style="flex:1">
-        <div class="pred-name">Tri Wardoyo — 27 poin</div>
-        <div class="pred-desc">2 poin dari puncak. Solid dan konsisten sepanjang group stage, dengan 1 match kosong (Portugal vs Uzbekistan). Masih berpeluang besar kalau 28 match sisa mayoritas berjalan "normal".</div>
-        <div class="pred-stat-row"><span class="pred-stat">Gap: 2</span><span class="pred-stat">4 contrarian</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:76%"></div></div>
-      </div>
-      <span class="pred-badge badge-safe">Solid</span>
     </div>
   </div>
 
@@ -207,30 +189,30 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0f1e; colo
     <div class="pred-card">
       <div class="pred-icon">🎰</div>
       <div style="flex:1">
-        <div class="pred-name">Vando &amp; Robi — 26 poin</div>
-        <div class="pred-desc"><b>Vando</b> punya 10 contrarian picks di sisa match — terbanyak di grup papan atas. Kalau 5-6 upset kecil kejadian, Vando bisa loncat ke #1 tiba-tiba. <b>Robi</b> kebalikannya — cuma 3 contrarian, tapi posisi bagus untuk "ikut naik" kalau mayoritas terus bener.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Gap: 3</span><span class="pred-stat">Vando: 10 contrarian</span><span class="pred-stat">Robi: 3 contrarian</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:72%"></div></div>
+        <div class="pred-name">Vando — 29 poin</div>
+        <div class="pred-desc">9 contrarian picks di sisa 24 match — terbanyak di grup papan atas. Banyak pilih Seri di match-match kunci. Kalau 5-6 upset kejadian, Vando bisa loncat ke #1 mendadak. High ceiling.</div>
+        <div class="pred-stat-row"><span class="pred-stat">Max 53/72</span><span class="pred-stat">9 contrarian</span><span class="pred-stat">Gap: 3</span></div>
+        <div class="pred-meter"><div class="pred-meter-fill" style="width:73%"></div></div>
+      </div>
+      <span class="pred-badge badge-dark">Dark Horse</span>
+    </div>
+    <div class="pred-card">
+      <div class="pred-icon">🛡️</div>
+      <div style="flex:1">
+        <div class="pred-name">Robi — 29 poin</div>
+        <div class="pred-desc">Hanya 3 contrarian picks — paling "safe" di seluruh peserta. Hampir semua pilihannya ikut mayoritas. Kalau mayoritas terus bener di sisa match, Robi bisa ikut naik kapal tanpa risiko.</div>
+        <div class="pred-stat-row"><span class="pred-stat">Max 53/72</span><span class="pred-stat">3 contrarian</span><span class="pred-stat">Gap: 3</span></div>
+        <div class="pred-meter"><div class="pred-meter-fill" style="width:73%"></div></div>
       </div>
       <span class="pred-badge badge-dark">Dark Horse</span>
     </div>
     <div class="pred-card">
       <div class="pred-icon">⚡</div>
       <div style="flex:1">
-        <div class="pred-name">Diana, Rustam &amp; Tika — 26 poin</div>
-        <div class="pred-desc">3 poin dari puncak dengan 28 match tersisa — masih sangat bisa. Diana dan Rustam punya contrarian picks yang targeted di match-match kunci. Jangan remehkan grup ini.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Gap: 3</span><span class="pred-stat">28 match tersisa</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:72%"></div></div>
-      </div>
-      <span class="pred-badge badge-dark">Dark Horse</span>
-    </div>
-    <div class="pred-card">
-      <div class="pred-icon">🎯</div>
-      <div style="flex:1">
-        <div class="pred-name">Gilang — 24 poin</div>
-        <div class="pred-desc">5 poin di belakang tapi 7 contrarian picks yang targeted. Cukup 5 upset bener → langsung masuk podium. Lebih realistis dari Bayu karena gap contrarian-nya lebih kecil.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Gap: 5</span><span class="pred-stat">7 contrarian</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:67%"></div></div>
+        <div class="pred-name">Diana, Rustam &amp; Tika — 29 poin</div>
+        <div class="pred-desc">Tiga orang ini tied di 29 poin dengan 4 contrarian picks masing-masing — cukup untuk ambil risiko terukur. Kalau salah satu contrarian mereka tepat di match krusial, bisa langsung masuk podium.</div>
+        <div class="pred-stat-row"><span class="pred-stat">Max 52-53/72</span><span class="pred-stat">4 contrarian</span><span class="pred-stat">Gap: 3</span></div>
+        <div class="pred-meter"><div class="pred-meter-fill" style="width:73%"></div></div>
       </div>
       <span class="pred-badge badge-dark">Dark Horse</span>
     </div>
@@ -239,13 +221,13 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0f1e; colo
   <div class="pred-divider"></div>
 
   <div class="pred-section">
-    <div class="pred-label" style="color:#f87171;">⚠️ High Risk</div>
+    <div class="pred-label" style="color:#f87171;">⚠️ Butuh Mukjizat</div>
     <div class="pred-card">
       <div class="pred-icon">🎲</div>
       <div style="flex:1">
-        <div class="pred-name">Bayu — 24 poin</div>
-        <div class="pred-desc">10 contrarian picks ekstrem termasuk beberapa yang hampir sendirian (Congo DR ngalahin Colombia — 24/25 orang beda!). All-or-nothing total: kalau upset-nya bener → juara telak, kalau salah → nyungsep.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Gap: 5</span><span class="pred-stat">10 contrarian</span><span class="pred-stat">High variance</span></div>
+        <div class="pred-name">Bayu — 26 poin</div>
+        <div class="pred-desc">6 poin dari puncak dengan 24 match tersisa. Masih bisa kalau 8 contrarian picks-nya bener semua — tapi termasuk beberapa yang sangat melawan arus. All-or-nothing.</div>
+        <div class="pred-stat-row"><span class="pred-stat">Max 50/72</span><span class="pred-stat">8 contrarian</span><span class="pred-stat">Gap: 6</span></div>
         <div class="pred-meter"><div class="pred-meter-fill" style="width:60%"></div></div>
       </div>
       <span class="pred-badge badge-risk">High Risk</span>
@@ -253,10 +235,10 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0f1e; colo
     <div class="pred-card">
       <div class="pred-icon">🌪️</div>
       <div style="flex:1">
-        <div class="pred-name">Ikiw — 15 poin</div>
-        <div class="pred-desc">22 contrarian picks dari 28 sisa match — hampir beda sendiri di setiap pertandingan. Butuh piala dunia paling gila sepanjang sejarah untuk bisa juara. Tapi kalau kejadian… legendary.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Gap: 14</span><span class="pred-stat">22 contrarian</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:42%"></div></div>
+        <div class="pred-name">Ikiw — 16 poin</div>
+        <div class="pred-desc">16 poin dari puncak, 17 contrarian picks di sisa 24 match. Matematikanya ada, tapi butuh piala dunia paling gila sepanjang sejarah. Kalau kejadian, legendary.</div>
+        <div class="pred-stat-row"><span class="pred-stat">Max 40/72</span><span class="pred-stat">17 contrarian</span><span class="pred-stat">Gap: 16</span></div>
+        <div class="pred-meter"><div class="pred-meter-fill" style="width:35%"></div></div>
       </div>
       <span class="pred-badge badge-risk">Underdog</span>
     </div>
@@ -269,9 +251,9 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0f1e; colo
     <div class="pred-card">
       <div class="pred-icon">👀</div>
       <div style="flex:1">
-        <div class="pred-name">Rustam &amp; Tika — 26 poin | Dwi — 24 poin</div>
-        <div class="pred-desc"><b>Rustam &amp; Tika</b> cuma 3 poin dari puncak — kalau 3 match berturut-turut mereka bener dan Charlie salah, langsung nyalip. <b>Dwi</b> agak ketinggalan tapi 7 contrarian picks bisa jadi senjata rahasia di babak akhir grup.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Rustam: gap 3</span><span class="pred-stat">Tika: gap 3</span><span class="pred-stat">Dwi: gap 5</span></div>
+        <div class="pred-name">Rajib &amp; Mario — 27 poin | Tri Wardoyo — 29 poin</div>
+        <div class="pred-desc"><b>Tri Wardoyo</b> (29 pts, 4 contrarian) — konsisten dan hanya 3 poin dari puncak, bisa jadi kuda hitam sunyi. <b>Rajib &amp; Mario</b> masing-masing punya 7 contrarian picks — berani ambil risiko di match-match tertentu yang bisa jadi game changer.</div>
+        <div class="pred-stat-row"><span class="pred-stat">Tri: gap 3</span><span class="pred-stat">Rajib: 7 contrarian</span><span class="pred-stat">Mario: 7 contrarian</span></div>
       </div>
       <span class="pred-badge badge-watch">Watch</span>
     </div>
@@ -471,11 +453,15 @@ scores[40]=[3,0];
 scores[41]=[3,2];
 scores[42]=[2,0];
 scores[43]=[1,2];
+scores[44]=[5,0];
+scores[45]=[1,0];
+scores[46]=[0,0];
+scores[47]=[0,1];
 
 [[2,0],[2,1],[1,1],[4,1],[0,1],[2,0],[1,1],[1,1],[1,0],[7,1],[2,2],[5,1],[1,1],[0,0],[2,2],[1,1],[3,1],[1,4],[3,0],[3,1],[1,0],[4,2],[1,1],[1,3],[1,1],[4,1],[6,0],[1,0],[3,0],[0,1],[2,0],[0,1],[2,1],[0,0],[5,1],[0,4],[0,0],[1,3],[4,0],[2,2],[3,0],[3,2],[2,0],[1,2],[5,0],[1,0],[0,0],[0,1]].forEach((s,i)=>scores[i]=s);
 
 const PALETTE=['#4e8ef7','#f75c5c','#34c97a','#f5c842','#a78bfa','#f97316','#06b6d4','#ec4899','#84cc16','#94a3b8','#fb923c','#22d3ee','#f43f5e','#a3e635','#c084fc','#38bdf8','#fbbf24','#4ade80','#f87171','#818cf8','#fdba74','#67e8f9','#f9a8d4','#bef264','#e879f9'];
-let hiddenPlayers=new Set(), currentFilter='all', myChart=null;
+let hiddenPlayers=new Set(), myChart=null;
 
 // ============================================================
 // TAB SWITCH
@@ -528,9 +514,7 @@ function render(){
   document.getElementById('chart-sub').textContent=completed+' match selesai';
   const sorted=PLAYER_NAMES.slice().sort((a,b)=>result[b].total-result[a].total);
   let visible=sorted;
-  if(currentFilter==='top5') visible=sorted.slice(0,5);
-  if(currentFilter==='bottom5') visible=sorted.slice(-5);
-  const maxPts=result[sorted[0]].total;
+    const maxPts=result[sorted[0]].total;
 
   document.getElementById('stats-row').innerHTML=`
     <div class="stat-card"><div class="stat-label">Pemimpin</div><div class="stat-val">${sorted[0]}</div><div class="stat-sub">${result[sorted[0]].total} poin dari ${completed} match</div></div>
