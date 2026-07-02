@@ -3,668 +3,520 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Arisan WC 2026 — Leaderboard</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<title>Arisan Liga — Progres Poin</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0f1e; color: #e8eaf0; min-height: 100vh; }
-.header { background: #0d1528; border-bottom: 1px solid #1e2d4a; padding: 16px 24px; display: flex; align-items: center; gap: 14px; }
-.header h1 { font-size: 18px; font-weight: 600; color: #fff; }
-.header p { font-size: 12px; color: #6b7fa3; margin-top: 2px; }
+  :root{
+    --bg:#0a0f1e;
+    --panel:#111a2e;
+    --panel2:#0d1526;
+    --border:#1e293f;
+    --text:#e8edf7;
+    --muted:#7f8caa;
+    --gold:#f5b942;
+    --red:#ef4444;
+    --grid:#1a2540;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:radial-gradient(1200px 600px at 15% -10%, #12203f 0%, var(--bg) 55%);
+    color:var(--text);
+    font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height:100vh;
+    padding:28px 36px 20px;
+  }
+  header{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+  .logo{
+    width:42px;height:42px;border-radius:10px;
+    background:linear-gradient(145deg,#1c2a4a,#0d1526);
+    border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;font-size:20px;
+  }
+  h1{font-size:22px;font-weight:700;letter-spacing:.2px;}
+  header p{color:var(--muted);font-size:13px;margin-top:2px;}
 
-/* Tab nav */
-.tabs { display: flex; background: #0d1528; border-bottom: 1px solid #1e2d4a; }
-.tab { padding: 12px 22px; font-size: 13px; color: #4a6080; cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; }
-.tab.active { color: #7ab0f0; border-bottom-color: #2a72d8; }
-.tab:hover:not(.active) { color: #8090b0; }
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+  .card{
+    background:var(--panel);border:1px solid var(--border);border-radius:14px;
+    padding:16px 20px;
+  }
+  .card .label{color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;}
+  .card .value{font-size:26px;font-weight:800;}
+  .card .sub{color:var(--muted);font-size:12px;margin-top:4px;}
+  .card .value.gold{color:var(--gold);}
 
-.tab-content { display: none; }
-.tab-content.active { display: block; }
+  .charts-row{display:flex;gap:16px;align-items:stretch;}
+  .charts-row .chart-panel{flex:1 1 0;min-width:0;margin-top:0;}
 
-/* ===== LAYOUT MAIN ===== */
-.main { display: grid; grid-template-columns: 320px 1fr; min-height: calc(100vh - 100px); }
-.sidebar { background: #0d1528; border-right: 1px solid #1e2d4a; overflow-y: auto; max-height: calc(100vh - 100px); }
-.chart-area { padding: 18px 22px; overflow-y: auto; max-height: calc(100vh - 100px); display: flex; flex-direction: column; gap: 14px; }
+  .chart-panel{
+    background:var(--panel);border:1px solid var(--border);border-radius:16px;
+    padding:18px 20px 10px;position:relative;display:flex;flex-direction:column;
+  }
+  .chart-panel h2{font-size:14.5px;font-weight:600;margin-bottom:2px;letter-spacing:.1px;}
+  .chart-panel .desc{color:var(--muted);font-size:11.5px;line-height:1.5;margin-bottom:10px;}
 
-/* Sidebar */
-.date-label { font-size: 10px; color: #2a4060; font-weight: 700; padding: 10px 12px 4px; letter-spacing:.07em; text-transform: uppercase; }
-.match-item { border-bottom: 1px solid #111a30; }
-.match-header { display: flex; align-items: center; gap: 6px; padding: 7px 12px; cursor: pointer; transition: background .15s; }
-.match-header:hover { background: #131f38; }
-.match-num { font-size: 10px; color: #3d5278; font-weight: 700; width: 22px; flex-shrink:0; }
-.match-flags { display: flex; align-items: center; gap: 3px; flex: 1; font-size: 12px; color: #8090b0; overflow: hidden; }
-.flag { font-size: 15px; line-height: 1; }
-.match-vs { font-size: 10px; color: #3d5278; padding: 0 2px; }
-.match-name { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
-.match-status { font-size: 10px; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
-.status-done { background: #0d2d1a; color: #3dbd6a; }
-.status-pending { background: #1a1e2a; color: #4a5270; }
+  .chart-scroll{
+    overflow-x:auto;overflow-y:hidden;
+    scrollbar-width:thin;scrollbar-color:var(--border) transparent;
+  }
+  .chart-scroll::-webkit-scrollbar{height:6px;}
+  .chart-scroll::-webkit-scrollbar-track{background:transparent;}
+  .chart-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
 
-.score-row { display: flex; align-items: center; gap: 5px; padding: 3px 12px 8px 36px; }
-.score-row input { width: 40px; background: #111a30; border: 1px solid #1e2d4a; border-radius: 5px; color: #e8eaf0; font-size: 14px; font-weight: 700; text-align: center; padding: 4px 2px; }
-.score-row input:focus { outline: none; border-color: #2a72d8; }
-.score-sep { color: #3d5278; font-weight: 700; }
-.score-team { font-size: 10px; color: #3d5278; }
+  svg{width:100%;height:auto;display:block;overflow:visible;}
+  .grid-line{stroke:var(--grid);stroke-width:1;opacity:.55;}
+  .axis-label{fill:var(--muted);font-size:10.5px;}
+  .col-label{fill:var(--muted);font-size:11.5px;font-weight:600;}
+  .col-label.zero{fill:var(--muted);font-style:italic;font-weight:500;opacity:.7;}
+  .name-tag{font-size:11.5px;font-weight:600;}
+  .sub-tag{font-size:10px;font-weight:500;fill:var(--muted);}
+  .point{cursor:pointer;stroke:var(--panel2);stroke-width:1.5;transition:r .12s ease;}
+  .point:hover{r:7;}
+  .point.zero{opacity:.5;}
+  .line-path{fill:none;stroke-width:2;opacity:.85;}
+  .line-path.dashed{stroke-dasharray:5 5;opacity:.55;}
 
-/* Stats */
-.stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
-.stat-card { background: #0d1528; border: 1px solid #1e2d4a; border-radius: 8px; padding: 11px 13px; }
-.stat-label { font-size: 10px; color: #4a6080; text-transform: uppercase; letter-spacing:.06em; }
-.stat-val { font-size: 20px; font-weight: 700; color: #fff; margin-top: 2px; }
-.stat-sub { font-size: 11px; color: #4a8060; margin-top: 1px; }
+  .tooltip{
+    position:fixed;pointer-events:none;
+    background:#0d1526;border:1px solid var(--border);border-radius:8px;
+    padding:9px 12px;font-size:12px;line-height:1.5;color:var(--text);
+    box-shadow:0 8px 20px rgba(0,0,0,.35);
+    opacity:0;transform:translateY(4px);transition:opacity .1s ease;
+    z-index:50;min-width:160px;
+  }
+  .tooltip.show{opacity:1;}
+  .tooltip .t-name{font-weight:700;font-size:13px;margin-bottom:4px;}
+  .tooltip .t-row{display:flex;justify-content:space-between;gap:16px;color:var(--muted);}
+  .tooltip .t-row b{color:var(--text);font-weight:600;}
 
-/* Chart */
-.chart-wrap { background: #0d1528; border: 1px solid #1e2d4a; border-radius: 10px; padding: 14px; }
-.chart-canvas-wrap { position: relative; height: 360px; }
-.section-title { font-size: 11px; font-weight: 600; letter-spacing:.08em; color: #4a6080; text-transform: uppercase; margin-bottom: 10px; }
+  .legend{
+    display:flex;flex-wrap:wrap;gap:8px 16px;
+    margin-top:14px;padding:12px 2px 2px;border-top:1px solid var(--border);
+  }
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);}
+  .legend-item .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .legend-item b{color:var(--text);font-weight:600;}
+  .legend-item .pts{color:var(--text);font-weight:600;}
 
-/* Legend */
-.legend-grid { display: flex; flex-wrap: wrap; gap: 5px 12px; }
-.leg { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #6b7fa3; cursor: pointer; }
-.leg-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink:0; }
-.leg.hidden { opacity:.3; }
-.leg-score { font-weight: 600; color: #8090b0; }
+  footer{text-align:center;color:var(--muted);font-size:11px;margin-top:14px;}
 
-/* Leaderboard */
-
-
-/* ===== GROUP STANDINGS TAB ===== */
-.groups-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; padding: 20px; }
-.group-card { background: #0d1528; border: 1px solid #1e2d4a; border-radius: 10px; overflow: hidden; }
-.group-card-header { background: #111e38; padding: 10px 14px; font-size: 12px; font-weight: 700; color: #7ab0f0; letter-spacing: .05em; }
-.group-table { width: 100%; border-collapse: collapse; }
-.group-table th { font-size: 10px; color: #3d5278; font-weight: 600; text-transform: uppercase; letter-spacing:.06em; padding: 6px 8px; text-align: center; border-bottom: 1px solid #111a30; }
-.group-table th:first-child { text-align: left; padding-left: 14px; }
-.group-table td { font-size: 12px; padding: 7px 8px; text-align: center; border-bottom: 1px solid #0f1728; }
-.group-table td:first-child { text-align: left; padding-left: 14px; }
-.group-table tr:last-child td { border-bottom: none; }
-.group-table tr:hover td { background: #111a30; }
-.team-cell { display: flex; align-items: center; gap: 7px; }
-.team-flag { font-size: 18px; line-height: 1; }
-.team-name { font-size: 12px; color: #c8d4f0; }
-.pts-cell { font-weight: 700; color: #fff; }
-.qualify { background: #0a2015 !important; }
-.qualify td { border-left: 2px solid #1a6040; }
-.qualify td:first-child { border-left: 2px solid #1a6040; }
-.pos-badge { display: inline-block; width: 18px; height: 18px; border-radius: 4px; font-size: 10px; font-weight: 700; line-height: 18px; text-align: center; margin-right: 4px; }
-.pos-1 { background: #1a3a60; color: #7ab0f0; }
-.pos-2 { background: #1a3020; color: #4a9060; }
-.pos-3 { background: #2a2010; color: #806040; }
-.pos-4 { background: #1e1a1a; color: #604040; }
-
-/* ── Prediction Panel ─────────────────────────── */
-.pred-panel { background: linear-gradient(135deg,#0f2944 0%,#1a3a5c 100%); border-radius: 16px; padding: 20px; color: #e8f0fe; }
-.pred-panel h2 { font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #7eb8f7; margin: 0 0 14px 0; }
-.pred-section { margin-bottom: 16px; }
-.pred-section:last-child { margin-bottom: 0; }
-.pred-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
-.pred-card { background: rgba(255,255,255,.07); border-radius: 10px; padding: 10px 12px; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 10px; border: 1px solid rgba(255,255,255,.1); }
-.pred-card:last-child { margin-bottom: 0; }
-.pred-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-.pred-name { font-size: 12px; font-weight: 700; color: #fff; line-height: 1.3; }
-.pred-desc { font-size: 11px; color: #a0bde0; margin-top: 2px; line-height: 1.5; }
-.pred-badge { font-size: 9px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; padding: 2px 7px; border-radius: 99px; flex-shrink: 0; margin-left: auto; align-self: center; }
-.badge-hot { background: #ef4444; color: #fff; }
-.badge-dark { background: #7c3aed; color: #fff; }
-.badge-safe { background: #059669; color: #fff; }
-.badge-risk { background: #f59e0b; color: #fff; }
-.badge-watch { background: #2563eb; color: #fff; }
-.pred-meter { height: 5px; background: rgba(255,255,255,.15); border-radius: 99px; overflow: hidden; margin-top: 6px; }
-.pred-meter-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #3b82f6, #7eb8f7); }
-.pred-stat-row { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
-.pred-stat { font-size: 10px; color: #7eb8f7; background: rgba(126,184,247,.12); padding: 2px 7px; border-radius: 6px; }
-.pred-divider { height: 1px; background: rgba(255,255,255,.08); margin: 10px 0; }
-
-
-/* ── Sidebar Day Slider ────────────────────────── */
-.day-nav { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #0d1224; border-bottom: 1px solid #1e2d4a; position: sticky; top: 0; z-index: 10; }
-.day-nav-btn { background: #1a2540; border: none; color: #7ab0f0; font-size: 16px; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s; }
-.day-nav-btn:hover { background: #243560; }
-.day-nav-btn:disabled { opacity: .3; cursor: default; }
-.day-nav-label { font-size: 11px; font-weight: 700; color: #c8d4f0; letter-spacing: .05em; }
-.day-nav-sub { font-size: 10px; color: #4a6080; text-align: center; margin-top: 1px; }
-.day-panel { display: none; }
-.day-panel.active { display: block; }
-
+  @media (max-width: 860px){
+    .charts-row{flex-direction:column;}
+  }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div style="font-size:28px">⚽</div>
+<header>
+  <div class="logo">⚽</div>
   <div>
-    <h1>Arisan WC 2026 — Leaderboard</h1>
-    <p>Update setiap jam 12.00</p>
+    <h1>Arisan Liga — Progres Poin</h1>
+    <p>Peringkat berubah berdasarkan akumulasi poin tiap liga · Liga 0 = urutan alfabetis (belum ada data)</p>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="card">
+    <div class="label">Pemimpin Sementara</div>
+    <div class="value gold" id="statLeader">—</div>
+    <div class="sub" id="statLeaderSub">—</div>
+  </div>
+  <div class="card">
+    <div class="label">Liga Selesai</div>
+    <div class="value" id="statMatches">—</div>
+    <div class="sub">dari total data yang diinput</div>
+  </div>
+  <div class="card">
+    <div class="label">Rata-rata Poin</div>
+    <div class="value" id="statAvg">—</div>
+    <div class="sub">poin per peserta yang sudah main</div>
   </div>
 </div>
 
-<div class="tabs">
-  <div class="tab active" onclick="switchTab('chart',this)">📈 Grafik & Poin</div>
-  <div class="tab" onclick="switchTab('groups',this)">🏆 Klasemen Grup</div>
-</div>
-
-<!-- TAB 1: CHART -->
-<div id="tab-chart" class="tab-content active">
-  <div class="main">
-    <div class="sidebar" id="sidebar"></div>
-    <div class="chart-area">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-        <div>
-          <div style="font-size:15px;font-weight:600;color:#c8d4f0;">Perjalanan Poin per Match</div>
-          <div style="font-size:12px;color:#4a6080;margin-top:2px;" id="chart-sub">— match selesai</div>
-        </div>
-        
-      </div>
-          <div class="stats-row" id="stats-row"></div>
-      <div class="chart-wrap"><div class="chart-canvas-wrap"><canvas id="myChart"></canvas></div></div>
-      <div>
-        <div class="section-title" style="margin-bottom:8px;">Legend — klik untuk hide/show</div>
-        <div class="legend-grid" id="legend"></div>
-      
-      <div class="pred-panel">
-  <h2>🔮 Analisis &amp; Prediksi</h2>
-
-  <div class="pred-section">
-    <div class="pred-label" style="color:#fbbf24;">🏆 Kandidat Kuat Juara</div>
-    <div class="pred-card">
-      <div class="pred-icon">🥇</div>
-      <div style="flex:1">
-        <div class="pred-name">Charlie — 39 poin</div>
-        <div class="pred-desc">Kokoh di puncak setelah 60 match, gap 2 poin dari 3 pengejar. Sisa 12 match — hanya butuh 3 poin lagi untuk nyaris dipastikan juara. Punya 4 contrarian picks di sisa match. Max possible 51.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Max 51/72</span><span class="pred-stat">4 contrarian</span><span class="pred-stat">Gap: 0</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:92%"></div></div>
-      </div>
-      <span class="pred-badge badge-hot">Favorit</span>
-    </div>
+<div class="charts-row">
+  <div class="chart-panel">
+    <h2>Perjalanan Poin per Liga</h2>
+    <div class="desc">Liga 0 = urutan nama alfabetis (titik awal, belum ada pertandingan). Liga 1 dst = peringkat berdasarkan total poin & gol. Garis putus/titik hilang saat pemain tidak ikut liga tsb, dan muncul lagi saat ia main lagi. Arahkan kursor ke titik untuk detail.</div>
+    <div class="chart-scroll"><svg id="chart" preserveAspectRatio="xMidYMid meet"></svg></div>
+    <div class="legend" id="legend"></div>
   </div>
 
-  <div class="pred-divider"></div>
-
-  <div class="pred-section">
-    <div class="pred-label" style="color:#60a5fa;">🎯 Pengejar Terdekat</div>
-    <div class="pred-card">
-      <div class="pred-icon">⚡</div>
-      <div style="flex:1">
-        <div class="pred-name">Enrico, Raihan &amp; Robi — 37 poin</div>
-        <div class="pred-desc">Tied di posisi 2, gap 2 poin dari Charlie. Butuh Charlie tersandung 2+ match sekaligus mereka benar. Raihan &amp; Robi punya 2 contrarian picks — ada celah kecil. Enrico paling defensif dengan hanya 1 contrarian.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Max 49/72</span><span class="pred-stat">1-2 contrarian</span><span class="pred-stat">Gap: 2</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:82%"></div></div>
-      </div>
-      <span class="pred-badge badge-safe">Konsisten</span>
-    </div>
-    <div class="pred-card">
-      <div class="pred-icon">🔥</div>
-      <div style="flex:1">
-        <div class="pred-name">Diana, Tri Wardoyo, Rustam, Tika &amp; Vando — 36 poin</div>
-        <div class="pred-desc">5 orang tied di 36, gap 3 dari puncak. Vando paling berpeluang kejutan dengan 5 contrarian picks — kalau tepat semua bisa loncat ke #1. Tika hanya 1 contrarian — paling aman tapi paling terbatas ruang geraknya.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Max 48/72</span><span class="pred-stat">1-5 contrarian</span><span class="pred-stat">Gap: 3</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:78%"></div></div>
-      </div>
-      <span class="pred-badge badge-dark">Dark Horse</span>
-    </div>
-  </div>
-
-  <div class="pred-divider"></div>
-
-  <div class="pred-section">
-    <div class="pred-label" style="color:#f87171;">⚠️ Butuh Mukjizat</div>
-    <div class="pred-card">
-      <div class="pred-icon">🎲</div>
-      <div style="flex:1">
-        <div class="pred-name">Bayu, Pak Yo &amp; Bryan — 29-31 poin</div>
-        <div class="pred-desc">Gap 8-10 poin dari puncak, hanya 12 match tersisa. Matematikanya nyaris mustahil — butuh Charlie kolaps total sementara mereka menang semua. Fokus mempertahankan posisi saja.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Max 41-43/72</span><span class="pred-stat">0-3 contrarian</span><span class="pred-stat">Gap: 8-10</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:30%"></div></div>
-      </div>
-      <span class="pred-badge badge-risk">High Risk</span>
-    </div>
-    <div class="pred-card">
-      <div class="pred-icon">🌪️</div>
-      <div style="flex:1">
-        <div class="pred-name">Ikiw — 18 poin</div>
-        <div class="pred-desc">Gap 21 poin dari puncak, hanya 12 match tersisa. Secara matematika sudah tidak mungkin menang (max 30). Dengan 6 contrarian picks masih bisa bikin ulah di papan tengah.</div>
-        <div class="pred-stat-row"><span class="pred-stat">Max 30/72</span><span class="pred-stat">6 contrarian</span><span class="pred-stat">Gap: 21</span></div>
-        <div class="pred-meter"><div class="pred-meter-fill" style="width:8%"></div></div>
-      </div>
-      <span class="pred-badge badge-risk">Eliminated</span>
-    </div>
-  </div>
-
-</div></div>
-    </div>
+  <div class="chart-panel">
+    <h2>🥇 Sepatu Emas — Total Gol Sepanjang Liga</h2>
+    <div class="desc">Liga 0 = urutan nama alfabetis. Liga 1 dst = peringkat berdasarkan total gol kumulatif. Garis putus/titik hilang saat pemain tidak ikut liga tsb — arahkan kursor ke titik untuk detail</div>
+    <div class="chart-scroll"><svg id="golChart" preserveAspectRatio="xMidYMid meet"></svg></div>
+    <div class="legend" id="goldenBoot"></div>
   </div>
 </div>
 
-<!-- TAB 2: GROUP STANDINGS -->
-<div id="tab-groups" class="tab-content">
-  <div class="groups-grid" id="groups-grid"></div>
-</div>
+<footer>Data: Liga 1st, 2nd, 3rd &amp; 4th · Update manual</footer>
+<div class="tooltip" id="tooltip"></div>
 
 <script>
-// ============================================================
-// FLAG MAP
-// ============================================================
-const FLAGS = {
-  'Mexico':'🇲🇽','South Africa':'🇿🇦','Korea Republic':'🇰🇷','Czechia':'🇨🇿',
-  'Canada':'🇨🇦','Bosnia-Herz.':'🇧🇦','USA':'🇺🇸','Paraguay':'🇵🇾',
-  'Haiti':'🇭🇹','Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Australia':'🇦🇺','Türkiye':'🇹🇷',
-  'Brazil':'🇧🇷','Morocco':'🇲🇦','Qatar':'🇶🇦','Switzerland':'🇨🇭',
-  "Côte d'Ivoire":'🇨🇮','Ecuador':'🇪🇨','Germany':'🇩🇪','Curaçao':'🇨🇼',
-  'Netherlands':'🇳🇱','Japan':'🇯🇵','Sweden':'🇸🇪','Tunisia':'🇹🇳',
-  'Saudi Arabia':'🇸🇦','Uruguay':'🇺🇾','Spain':'🇪🇸','Cape Verde':'🇨🇻',
-  'Iran':'🇮🇷','New Zealand':'🇳🇿','Belgium':'🇧🇪','Egypt':'🇪🇬',
-  'France':'🇫🇷','Senegal':'🇸🇳','Iraq':'🇮🇶','Norway':'🇳🇴',
-  'Argentina':'🇦🇷','Algeria':'🇩🇿','Austria':'🇦🇹','Jordan':'🇯🇴',
-  'Ghana':'🇬🇭','Panama':'🇵🇦','England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Croatia':'🇭🇷',
-  'Portugal':'🇵🇹','Congo DR':'🇨🇩','Uzbekistan':'🇺🇿','Colombia':'🇨🇴',
-  'Bosnia & Herz.':'🇧🇦','South Korea':'🇰🇷','Ivory Coast':'🇨🇮',
-  'IR Iran':'🇮🇷',
-};
-function flag(t) { return FLAGS[t] || '🏳️'; }
-
-// ============================================================
-// MATCHES DATA (all 72 matches from Excel col G)
-// ============================================================
-const MATCHES = [
-  {no:1,date:'11 Jun',grup:'Grup A',t1:'Mexico',t2:'South Africa'},
-  {no:2,date:'11 Jun',grup:'Grup A',t1:'Korea Republic',t2:'Czechia'},
-  {no:3,date:'12 Jun',grup:'Grup B',t1:'Canada',t2:'Bosnia-Herz.'},
-  {no:4,date:'12 Jun',grup:'Grup D',t1:'USA',t2:'Paraguay'},
-  {no:5,date:'13 Jun',grup:'Grup C',t1:'Haiti',t2:'Scotland'},
-  {no:6,date:'13 Jun',grup:'Grup D',t1:'Australia',t2:'Türkiye'},
-  {no:7,date:'13 Jun',grup:'Grup C',t1:'Brazil',t2:'Morocco'},
-  {no:8,date:'13 Jun',grup:'Grup B',t1:'Qatar',t2:'Switzerland'},
-  {no:9,date:'14 Jun',grup:'Grup E',t1:"Côte d'Ivoire",t2:'Ecuador'},
-  {no:10,date:'14 Jun',grup:'Grup E',t1:'Germany',t2:'Curaçao'},
-  {no:11,date:'14 Jun',grup:'Grup F',t1:'Netherlands',t2:'Japan'},
-  {no:12,date:'14 Jun',grup:'Grup F',t1:'Sweden',t2:'Tunisia'},
-  {no:13,date:'15 Jun',grup:'Grup H',t1:'Saudi Arabia',t2:'Uruguay'},
-  {no:14,date:'15 Jun',grup:'Grup H',t1:'Spain',t2:'Cape Verde'},
-  {no:15,date:'15 Jun',grup:'Grup G',t1:'Iran',t2:'New Zealand'},
-  {no:16,date:'15 Jun',grup:'Grup G',t1:'Belgium',t2:'Egypt'},
-  {no:17,date:'16 Jun',grup:'Grup I',t1:'France',t2:'Senegal'},
-  {no:18,date:'16 Jun',grup:'Grup I',t1:'Iraq',t2:'Norway'},
-  {no:19,date:'16 Jun',grup:'Grup J',t1:'Argentina',t2:'Algeria'},
-  {no:20,date:'16 Jun',grup:'Grup J',t1:'Austria',t2:'Jordan'},
-  {no:21,date:'17 Jun',grup:'Grup L',t1:'Ghana',t2:'Panama'},
-  {no:22,date:'17 Jun',grup:'Grup L',t1:'England',t2:'Croatia'},
-  {no:23,date:'17 Jun',grup:'Grup K',t1:'Portugal',t2:'Congo DR'},
-  {no:24,date:'17 Jun',grup:'Grup K',t1:'Uzbekistan',t2:'Colombia'},
-  {no:25,date:'18 Jun',grup:'Grup A',t1:'Czechia',t2:'South Africa'},
-  {no:26,date:'18 Jun',grup:'Grup B',t1:'Switzerland',t2:'Bosnia-Herz.'},
-  {no:27,date:'18 Jun',grup:'Grup B',t1:'Canada',t2:'Qatar'},
-  {no:28,date:'18 Jun',grup:'Grup A',t1:'Mexico',t2:'Korea Republic'},
-  {no:29,date:'19 Jun',grup:'Grup C',t1:'Brazil',t2:'Haiti'},
-  {no:30,date:'19 Jun',grup:'Grup C',t1:'Scotland',t2:'Morocco'},
-  {no:31,date:'19 Jun',grup:'Grup D',t1:'USA',t2:'Australia'},
-  {no:32,date:'19 Jun',grup:'Grup D',t1:'Türkiye',t2:'Paraguay'},
-  {no:33,date:'20 Jun',grup:'Grup E',t1:'Germany',t2:"Côte d'Ivoire"},
-  {no:34,date:'20 Jun',grup:'Grup E',t1:'Ecuador',t2:'Curaçao'},
-  {no:35,date:'20 Jun',grup:'Grup F',t1:'Netherlands',t2:'Sweden'},
-  {no:36,date:'20 Jun',grup:'Grup F',t1:'Tunisia',t2:'Japan'},
-  {no:37,date:'21 Jun',grup:'Grup G',t1:'Belgium',t2:'Iran'},
-  {no:38,date:'21 Jun',grup:'Grup G',t1:'New Zealand',t2:'Egypt'},
-  {no:39,date:'21 Jun',grup:'Grup H',t1:'Spain',t2:'Saudi Arabia'},
-  {no:40,date:'21 Jun',grup:'Grup H',t1:'Uruguay',t2:'Cape Verde'},
-  {no:41,date:'22 Jun',grup:'Grup I',t1:'France',t2:'Iraq'},
-  {no:42,date:'22 Jun',grup:'Grup I',t1:'Norway',t2:'Senegal'},
-  {no:43,date:'22 Jun',grup:'Grup J',t1:'Argentina',t2:'Austria'},
-  {no:44,date:'22 Jun',grup:'Grup J',t1:'Jordan',t2:'Algeria'},
-  {no:45,date:'23 Jun',grup:'Grup K',t1:'Portugal',t2:'Uzbekistan'},
-  {no:46,date:'23 Jun',grup:'Grup K',t1:'Colombia',t2:'Congo DR'},
-  {no:47,date:'23 Jun',grup:'Grup L',t1:'England',t2:'Ghana'},
-  {no:48,date:'23 Jun',grup:'Grup L',t1:'Panama',t2:'Croatia'},
-  {no:49,date:'24 Jun',grup:'Grup A',t1:'Czechia',t2:'Mexico'},
-  {no:50,date:'24 Jun',grup:'Grup A',t1:'South Africa',t2:'Korea Republic'},
-  {no:51,date:'24 Jun',grup:'Grup B',t1:'Switzerland',t2:'Canada'},
-  {no:52,date:'24 Jun',grup:'Grup B',t1:'Bosnia-Herz.',t2:'Qatar'},
-  {no:53,date:'25 Jun',grup:'Grup C',t1:'Scotland',t2:'Brazil'},
-  {no:54,date:'25 Jun',grup:'Grup C',t1:'Morocco',t2:'Haiti'},
-  {no:55,date:'25 Jun',grup:'Grup D',t1:'Türkiye',t2:'USA'},
-  {no:56,date:'25 Jun',grup:'Grup D',t1:'Paraguay',t2:'Australia'},
-  {no:57,date:'26 Jun',grup:'Grup E',t1:'Ecuador',t2:'Germany'},
-  {no:58,date:'26 Jun',grup:'Grup E',t1:'Curaçao',t2:"Côte d'Ivoire"},
-  {no:59,date:'26 Jun',grup:'Grup F',t1:'Tunisia',t2:'Netherlands'},
-  {no:60,date:'26 Jun',grup:'Grup F',t1:'Japan',t2:'Sweden'},
-  {no:61,date:'27 Jun',grup:'Grup G',t1:'New Zealand',t2:'Belgium'},
-  {no:62,date:'27 Jun',grup:'Grup G',t1:'Egypt',t2:'Iran'},
-  {no:63,date:'27 Jun',grup:'Grup H',t1:'Uruguay',t2:'Spain'},
-  {no:64,date:'27 Jun',grup:'Grup H',t1:'Cape Verde',t2:'Saudi Arabia'},
-  {no:65,date:'28 Jun',grup:'Grup I',t1:'Norway',t2:'France'},
-  {no:66,date:'28 Jun',grup:'Grup I',t1:'Senegal',t2:'Iraq'},
-  {no:67,date:'28 Jun',grup:'Grup J',t1:'Jordan',t2:'Argentina'},
-  {no:68,date:'28 Jun',grup:'Grup J',t1:'Algeria',t2:'Austria'},
-  {no:69,date:'29 Jun',grup:'Grup K',t1:'Colombia',t2:'Portugal'},
-  {no:70,date:'29 Jun',grup:'Grup K',t1:'Congo DR',t2:'Uzbekistan'},
-  {no:71,date:'29 Jun',grup:'Grup L',t1:'Panama',t2:'England'},
-  {no:72,date:'29 Jun',grup:'Grup L',t1:'Croatia',t2:'Ghana'},
+// ---------- RAW DATA (entries keyed by nomor liga, 1-based) ----------
+const players = [
+  { name:'Vando',  color:'#4d8cf5', entries:{
+      1:{team:'Spain',         poin:15, gol:33},
+      2:{team:'PSG',           poin:4,  gol:12},
+      3:{team:'PSG',           poin:12, gol:14},
+      4:{team:'PSG',           poin:4,  gol:12},
+  }},
+  { name:'Fadhil', color:'#ec5fb0', entries:{
+      1:{team:'England',       poin:12, gol:26},
+      2:{team:'Real Madrid',   poin:3,  gol:9},
+      3:{team:'Real Madrid',   poin:22, gol:12},
+  }},
+  { name:'Gilang', color:'#f5b942', entries:{
+      1:{team:'France',        poin:10, gol:32},
+      2:{team:'Liverpool',     poin:13, gol:11},
+  }},
+  { name:'Ikiw',   color:'#3ec6a8', entries:{
+      1:{team:'Argentina',     poin:10, gol:19},
+      2:{team:'Bayern Munchen',poin:2,  gol:10},
+  }},
+  { name:'Robi',   color:'#9b7cf0', entries:{
+      1:{team:'Germany',       poin:9,  gol:28},
+      3:{team:'Liverpool',     poin:9,  gol:1},
+  }},
+  { name:'Reza',   color:'#38b6d9', entries:{
+      1:{team:'Portugal',      poin:4,  gol:15},
+      3:{team:'Bayern Munchen',poin:9,  gol:4},
+      4:{team:'Bayern Munchen',poin:9,  gol:4},
+  }},
+  { name:'Bayu',   color:'#ef6a5f', entries:{
+      1:{team:'Brazil',        poin:1,  gol:21},
+      2:{team:'Arsenal',       poin:11, gol:8},
+      4:{team:'Real Madrid',   poin:3,  gol:52},
+  }},
+  { name:'Rustam', color:'#c084fc', entries:{
+      4:{team:'Liverpool',     poin:13, gol:11},
+  }},
 ];
 
-// ============================================================
-// PICKS (dari Excel — fixed)
-// ============================================================
-const PICKS = {
-  "Enrico":[0,1,0,1,1,0,0,1,0,1,1,1,0,0,1,0,1,1,1,1,0,1,0,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,0,1,1,1,1,1,1,0,1,1,0,0,0,1,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Dwi":[1,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,1,1,0,1,1,0,1,0,1,0,1,1,0,1,1,0,0,0,1,1,0,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Bayu":[1,0,0,1,1,1,0,0,1,1,0,1,0,0,0,0,1,1,1,1,0,1,0,0,0,1,1,0,1,0,1,0,1,1,0,1,0,1,1,0,1,1,1,0,1,0,0,1,0,0,1,0,1,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Bryan":[0,1,0,1,1,0,0,0,0,1,0,0,0,0,0,0,1,1,1,1,0,0,0,1,0,1,1,1,1,0,1,0,1,0,1,1,0,0,1,0,1,0,1,0,1,1,0,1,1,0,0,0,1,1,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Putu":[1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,1,0,1,1,1,1,0,1,0,1,0,0,1,0,1,1,0,1,0,1,1,1,1,0,1,1,0,0,1,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Anton":[1,0,1,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,1,0,1,0,1,0,1,0,1,1,0,0,1,0,1,0,1,1,1,1,0,1,1,0,0,1,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Pak Yo":[1,0,1,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,0,1,0,1,1,0,1,1,0,1,1,1,0,1,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Diana":[1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,1,1,1,1,1,1,0,0,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,0,1,0,1,1,1,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Chris":[1,0,0,1,1,0,0,0,1,1,0,1,0,0,0,0,1,1,1,1,1,0,0,1,1,0,1,0,1,0,1,0,1,0,1,1,0,1,1,0,1,1,1,0,1,1,0,1,1,0,0,1,1,1,1,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Charlie":[1,1,0,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1,0,1,0,1,1,0,1,1,0,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Gilang":[1,1,0,0,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,1,1,1,1,0,1,1,0,0,1,0,1,1,0,1,1,0,1,0,1,1,1,1,0,1,1,0,1,1,1,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Rajib":[1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,0,0,1,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,1,0,1,1,0,1,1,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Sidra":[1,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,0,0,1,1,1,1,0,1,0,1,0,1,0,0,1,1,0,1,0,1,0,1,0,1,1,0,1,0,0,1,1,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Mario":[1,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,0,1,0,1,1,0,1,0,1,1,1,1,0,1,1,0,0,1,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Tri Wardoyo":[0,0,0,1,1,0,0,0,1,1,1,1,0,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,0,0,1,0,0,1,0,1,1,0,1,1,1,1,0,1,0,1,0,0,1,1,1,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Raihan":[0,1,0,1,1,1,0,0,0,1,0,1,0,0,0,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,0,1,1,0,1,1,1,1,1,1,0,1,0,0,1,1,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Latif":[1,1,0,1,1,0,1,0,0,1,1,1,0,0,0,0,1,1,1,1,1,0,0,1,0,1,1,0,1,0,0,0,1,0,1,1,0,1,1,0,1,0,1,0,1,1,0,1,1,0,0,1,1,1,0,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Rustam":[1,0,0,1,1,0,0,0,0,1,1,1,0,0,0,0,1,1,1,1,0,1,0,1,1,1,1,1,1,1,0,0,1,0,0,1,0,1,1,0,1,1,1,1,1,1,0,1,0,0,1,1,1,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Istie":[0,1,1,1,1,0,1,1,0,1,1,1,1,0,0,0,1,1,1,1,0,0,0,0,1,0,0,0,1,0,0,1,1,0,1,1,1,1,1,0,1,0,1,0,1,1,0,1,1,0,0,0,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Tika":[1,0,0,1,1,1,0,1,0,1,0,1,0,0,0,0,1,0,1,1,1,0,0,1,0,1,1,0,1,1,1,0,1,0,1,1,0,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Nike":[1,1,1,0,1,1,0,0,0,1,0,1,0,0,0,0,1,0,1,0,0,1,0,1,1,0,0,0,1,1,0,1,1,0,1,1,0,0,1,0,0,0,1,0,1,1,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Ikiw":[0,0,0,1,0,1,0,1,0,1,0,0,1,0,0,0,1,0,1,1,0,0,0,0,0,1,0,0,0,0,1,0,1,1,1,0,0,0,1,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Eja":[0,1,1,0,1,0,0,0,0,1,0,1,1,0,0,0,1,1,1,1,1,1,0,1,0,1,0,0,1,1,0,0,1,0,0,1,0,1,1,0,1,1,1,0,1,1,0,1,0,0,1,0,1,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Vando":[1,1,1,0,1,0,1,0,1,1,0,1,0,0,0,0,1,1,1,0,1,1,0,1,0,1,1,0,1,0,1,0,1,0,1,1,0,1,1,0,1,0,1,1,1,1,0,1,0,0,1,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
-  "Robi":[1,0,0,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,0,1,1,0,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0]
-};
-const PLAYER_NAMES = Object.keys(PICKS);
+const MAX_ROUNDS = Math.max(...players.map(p=>Math.max(...Object.keys(p.entries).map(Number))));
+const N_PLAYERS = players.length;
+const TOTAL_COLS = MAX_ROUNDS + 1; // +1 untuk kolom "Liga 0" (alfabetis)
 
-// Pre-filled scores match 1-44
-let scores = new Array(72).fill(null);
-scores[0]=[2,0];
-scores[1]=[2,1];
-scores[2]=[1,1];
-scores[3]=[4,1];
-scores[4]=[0,1];
-scores[5]=[2,0];
-scores[6]=[1,1];
-scores[7]=[1,1];
-scores[8]=[1,0];
-scores[9]=[7,1];
-scores[10]=[2,2];
-scores[11]=[5,1];
-scores[12]=[1,1];
-scores[13]=[0,0];
-scores[14]=[2,2];
-scores[15]=[1,1];
-scores[16]=[3,1];
-scores[17]=[1,4];
-scores[18]=[3,0];
-scores[19]=[3,1];
-scores[20]=[1,0];
-scores[21]=[4,2];
-scores[22]=[1,1];
-scores[23]=[1,3];
-scores[24]=[1,1];
-scores[25]=[4,1];
-scores[26]=[6,0];
-scores[27]=[1,0];
-scores[28]=[3,0];
-scores[29]=[0,1];
-scores[30]=[2,0];
-scores[31]=[0,1];
-scores[32]=[2,1];
-scores[33]=[0,0];
-scores[34]=[5,1];
-scores[35]=[0,4];
-scores[36]=[0,0];
-scores[37]=[1,3];
-scores[38]=[4,0];
-scores[39]=[2,2];
-scores[40]=[3,0];
-scores[41]=[3,2];
-scores[42]=[2,0];
-scores[43]=[1,2];
-scores[44]=[5,0];
-scores[45]=[1,0];
-scores[46]=[0,0];
-scores[47]=[0,1];
+// startRound (1-based) = first liga a player actually joined
+players.forEach(p=>{
+  p.startRound = Math.min(...Object.keys(p.entries).map(Number));
+});
 
-[[2,0],[2,1],[1,1],[4,1],[0,1],[2,0],[1,1],[1,1],[1,0],[7,1],[2,2],[5,1],[1,1],[0,0],[2,2],[1,1],[3,1],[1,4],[3,0],[3,1],[1,0],[4,2],[1,1],[1,3],[1,1],[4,1],[6,0],[1,0],[3,0],[0,1],[2,0],[0,1],[2,1],[0,0],[5,1],[0,4],[0,0],[1,3],[4,0],[2,2],[3,0],[3,2],[2,0],[1,2],[5,0],[1,0],[0,0],[0,1],[0,2],[1,0],[2,1],[3,1],[0,3],[4,2],[3,2],[0,0],[2,1],[0,2],[1,3],[1,1]].forEach((s,i)=>scores[i]=s);
-
-const PALETTE=['#4e8ef7','#f75c5c','#34c97a','#f5c842','#a78bfa','#f97316','#06b6d4','#ec4899','#84cc16','#94a3b8','#fb923c','#22d3ee','#f43f5e','#a3e635','#c084fc','#38bdf8','#fbbf24','#4ade80','#f87171','#818cf8','#fdba74','#67e8f9','#f9a8d4','#bef264','#e879f9'];
-let hiddenPlayers=new Set(), myChart=null;
-
-// ============================================================
-// TAB SWITCH
-// ============================================================
-function switchTab(tab, el) {
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('tab-'+tab).classList.add('active');
-  if(tab==='groups') renderGroups();
-}
-
-// ============================================================
-// SIDEBAR
-
-function toggleScore(i){}
-
-function updateScore(i){}
-
-// ============================================================
-// COMPUTE CUMULATIVE (leaderboard chart)
-// ============================================================
-function computeCumulative(){
-  const completed=scores.reduce((n,s,i)=>s!==null?i+1:n,0);
-  const result={};
-  PLAYER_NAMES.forEach(name=>{
-    let total=0;const cum=[];
-    for(let i=0;i<completed;i++){if(scores[i]!==null&&PICKS[name][i]===1)total++;cum.push(total);}
-    result[name]={cum,total};
-  });
-  return{result,completed};
-}
-
-// ============================================================
-// FILTER
-// ============================================================
-function setFilter(f,btn){
-  currentFilter=f;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  render();
-}
-
-// ============================================================
-// RENDER CHART TAB
-// ============================================================
-function render(){
-  const{result,completed}=computeCumulative();
-  if(completed===0)return;
-  document.getElementById('chart-sub').textContent=completed+' match selesai';
-  const sorted=PLAYER_NAMES.slice().sort((a,b)=>result[b].total-result[a].total);
-  let visible=sorted;
-    const maxPts=result[sorted[0]].total;
-
-  document.getElementById('stats-row').innerHTML=`
-    <div class="stat-card"><div class="stat-label">Pemimpin</div><div class="stat-val">${sorted[0]}</div><div class="stat-sub">${result[sorted[0]].total} poin dari ${completed} match</div></div>
-    <div class="stat-card"><div class="stat-label">Match selesai</div><div class="stat-val">${completed}<span style="font-size:13px;color:#4a6080"> / 72</span></div><div class="stat-sub">${72-completed} tersisa</div></div>
-    <div class="stat-card"><div class="stat-label">Rata-rata</div><div class="stat-val">${(PLAYER_NAMES.reduce((s,n)=>s+result[n].total,0)/PLAYER_NAMES.length).toFixed(1)}</div><div class="stat-sub">poin per peserta</div></div>`;
-
-  const labels=Array.from({length:completed},(_,i)=>'M'+(i+1));
-  const datasets=visible.map(name=>{
-    const pidx=PLAYER_NAMES.indexOf(name);
-    const color=PALETTE[pidx%PALETTE.length];
-    return{label:name,data:result[name].cum,borderColor:color,backgroundColor:color+'33',borderWidth:hiddenPlayers.has(name)?0:2,pointRadius:completed<=24?4:2,pointHoverRadius:7,fill:false,tension:.3,hidden:hiddenPlayers.has(name)};
-  });
-
-  if(!myChart){
-    myChart=new Chart(document.getElementById('myChart'),{
-      type:'line',data:{labels,datasets},
-      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-        plugins:{legend:{display:false},tooltip:{backgroundColor:'#0d1528',borderColor:'#1e2d4a',borderWidth:1,titleColor:'#c8d4f0',bodyColor:'#8090b0',
-          callbacks:{
-            title:items=>{const idx=items[0].dataIndex;const m=MATCHES[idx];const s=scores[idx];return`M${m.no} ${m.grup}: ${m.t1} ${s?s[0]+'-'+s[1]:''} ${m.t2}`;},
-            label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y} poin`,
-            afterBody:items=>{const idx=items[0].dataIndex;const top=visible.filter(n=>!hiddenPlayers.has(n)).sort((a,b)=>result[b].cum[idx]-result[a].cum[idx]).slice(0,3);return['','  Top 3:',...top.map((n,i)=>`  ${['🥇','🥈','🥉'][i]} ${n}: ${result[n].cum[idx]}`)];},
-          },itemSort:(a,b)=>b.parsed.y-a.parsed.y}},
-        scales:{x:{ticks:{color:'#3d5278',font:{size:10}},grid:{color:'#0f1a2e'}},y:{min:0,ticks:{color:'#3d5278',font:{size:10},stepSize:2},grid:{color:'#111a30'}}}}
-    });
-  } else {
-    myChart.data.labels=labels;myChart.data.datasets=datasets;myChart.update();
+// build cumulative array, index 0..MAX_ROUNDS-1 (mewakili Liga 1..MAX_ROUNDS)
+// cum[r] = null jika pemain belum join, selain itu {team,poin,gol,totalPoin,totalGol,carried}
+players.forEach(p=>{
+  let totPoin=0, totGol=0;
+  p.cum = [];
+  for(let round=1; round<=MAX_ROUNDS; round++){
+    if(round < p.startRound){ p.cum.push(null); continue; }
+    const entry = p.entries[round];
+    if(entry){
+      totPoin += entry.poin; totGol += entry.gol;
+      p.cum.push({team:entry.team, poin:entry.poin, gol:entry.gol, totalPoin:totPoin, totalGol:totGol, carried:false});
+    } else {
+      p.cum.push({team:'-', poin:0, gol:0, totalPoin:totPoin, totalGol:totGol, carried:true});
+    }
   }
+});
 
-  document.getElementById('legend').innerHTML=visible.map(name=>{
-    const pidx=PLAYER_NAMES.indexOf(name);const color=PALETTE[pidx%PALETTE.length];
-    return`<span class="leg ${hiddenPlayers.has(name)?'hidden':''}" onclick="togglePlayer('${name}')"><span class="leg-dot" style="background:${color}"></span>${name}<span class="leg-score">${result[name].total}</span></span>`;
-  }).join('');
+// ---- Liga 0: urutan alfabetis, semua pemain tampil, belum ada data pertandingan ----
+const liga0Order = players
+  .map((p,i)=>({i, name:p.name}))
+  .sort((a,b)=> a.name.localeCompare(b.name))
+  .map(o=>o.i);
 
+// rank per liga real (kolom 1..MAX_ROUNDS), berdasarkan total poin & total gol kumulatif
+const rankMatrixReal = [];
+for(let r=0; r<MAX_ROUNDS; r++){
+  const order = players
+    .map((p,i)=>({i, c:p.cum[r]}))
+    .filter(o=>o.c !== null)
+    .map(o=>({i:o.i, tp:o.c.totalPoin, tg:o.c.totalGol, name:players[o.i].name}));
+  order.sort((a,b)=> b.tp-a.tp || b.tg-a.tg || a.name.localeCompare(b.name));
+  rankMatrixReal.push(order.map(o=>o.i));
 }
+// gabung: kolom 0 = Liga 0 (alfabetis), kolom 1..MAX_ROUNDS = data real
+const rankMatrix = [liga0Order, ...rankMatrixReal];
 
-function togglePlayer(name){
-  if(hiddenPlayers.has(name))hiddenPlayers.delete(name);else hiddenPlayers.add(name);
-  render();
+players.forEach((p,i)=>{
+  p.rankAtCol = rankMatrix.map(order => {
+    const idx = order.indexOf(i);
+    return idx === -1 ? null : idx;
+  });
+});
+
+// finish urutan per liga: peringkat berdasarkan poin yang didapat DI LIGA ITU SAJA
+// (bukan akumulasi), hanya di antara pemain yang benar-benar main liga tsb
+const finishMatrix = [];
+for(let r=0; r<MAX_ROUNDS; r++){
+  const contestants = players
+    .map((p,i)=>({i, c:p.cum[r]}))
+    .filter(o=>o.c !== null && !o.c.carried)
+    .map(o=>({i:o.i, poin:o.c.poin, gol:o.c.gol, name:players[o.i].name}));
+  contestants.sort((a,b)=> b.poin-a.poin || b.gol-a.gol || a.name.localeCompare(b.name));
+  finishMatrix.push({ order:contestants.map(c=>c.i), total:contestants.length });
 }
+players.forEach((p,i)=>{
+  p.finishAtRound = finishMatrix.map(fm => {
+    const idx = fm.order.indexOf(i);
+    return idx === -1 ? null : {rank: idx+1, total: fm.total};
+  });
+});
 
-// ============================================================
-// GROUP STANDINGS
-// ============================================================
-function computeStandings(){
-  const teamStats={};
-  // Init all teams
-  MATCHES.forEach(m=>{
-    [m.t1,m.t2].forEach(t=>{
-      if(!teamStats[t]) teamStats[t]={mp:0,w:0,d:0,l:0,gf:0,ga:0,pts:0,grup:m.grup};
-    });
-  });
-  // Compute from completed matches
-  MATCHES.forEach((m,i)=>{
-    const s=scores[i];
-    if(s===null) return;
-    const [s1,s2]=s;
-    // team1
-    teamStats[m.t1].mp++;teamStats[m.t1].gf+=s1;teamStats[m.t1].ga+=s2;
-    // team2
-    teamStats[m.t2].mp++;teamStats[m.t2].gf+=s2;teamStats[m.t2].ga+=s1;
-    if(s1>s2){teamStats[m.t1].w++;teamStats[m.t1].pts+=3;teamStats[m.t2].l++;}
-    else if(s2>s1){teamStats[m.t2].w++;teamStats[m.t2].pts+=3;teamStats[m.t1].l++;}
-    else{teamStats[m.t1].d++;teamStats[m.t1].pts++;teamStats[m.t2].d++;teamStats[m.t2].pts++;}
-  });
-  // Group by grup
-  const groups={};
-  Object.entries(teamStats).forEach(([team,stat])=>{
-    if(!groups[stat.grup]) groups[stat.grup]=[];
-    groups[stat.grup].push({team,...stat});
-  });
-  // Sort each group: pts desc, GD desc, GF desc
-  Object.values(groups).forEach(arr=>arr.sort((a,b)=>{
-    if(b.pts!==a.pts) return b.pts-a.pts;
-    const gdA=a.gf-a.ga, gdB=b.gf-b.ga;
-    if(gdB!==gdA) return gdB-gdA;
-    return b.gf-a.gf;
-  }));
-  return groups;
+// ---- ranking berdasarkan TOTAL GOL kumulatif (untuk chart Sepatu Emas) ----
+const golRankMatrixReal = [];
+for(let r=0; r<MAX_ROUNDS; r++){
+  const order = players
+    .map((p,i)=>({i, c:p.cum[r]}))
+    .filter(o=>o.c !== null)
+    .map(o=>({i:o.i, tg:o.c.totalGol, tp:o.c.totalPoin, name:players[o.i].name}));
+  order.sort((a,b)=> b.tg-a.tg || b.tp-a.tp || a.name.localeCompare(b.name));
+  golRankMatrixReal.push(order.map(o=>o.i));
 }
+const golRankMatrix = [liga0Order, ...golRankMatrixReal];
 
-function renderGroups(){
-  const groups=computeStandings();
-  const grid=document.getElementById('groups-grid');
-  grid.innerHTML=Object.entries(groups).sort((a,b)=>a[0].localeCompare(b[0])).map(([grup,teams])=>{
-    const rows=teams.map((t,i)=>{
-      const gd=t.gf-t.ga;
-      const posClass=`pos-${i+1}`;
-      const qualClass=i<2?'qualify':'';
-      return`<tr class="${qualClass}">
-        <td><div class="team-cell"><span class="pos-badge ${posClass}">${i+1}</span><span class="team-flag">${flag(t.team)}</span><span class="team-name">${t.team}</span></div></td>
-        <td>${t.mp}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td>
-        <td>${t.gf}:${t.ga}</td>
-        <td style="color:${gd>0?'#3dbd6a':gd<0?'#f75c5c':'#8090b0'}">${gd>0?'+':''}${gd}</td>
-        <td class="pts-cell">${t.pts}</td>
-      </tr>`;
-    }).join('');
-    return`<div class="group-card">
-      <div class="group-card-header">⚽ ${grup}</div>
-      <table class="group-table">
-        <thead><tr><th>Tim</th><th>M</th><th>W</th><th>D</th><th>L</th><th>GF:GA</th><th>GD</th><th>Pts</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>`;
-  }).join('');
+players.forEach((p,i)=>{
+  p.golRankAtCol = golRankMatrix.map(order => {
+    const idx = order.indexOf(i);
+    return idx === -1 ? null : idx;
+  });
+});
+
+// finish urutan gol per liga (berdasarkan gol yang dicetak DI LIGA ITU SAJA)
+const finishGolMatrix = [];
+for(let r=0; r<MAX_ROUNDS; r++){
+  const contestants = players
+    .map((p,i)=>({i, c:p.cum[r]}))
+    .filter(o=>o.c !== null && !o.c.carried)
+    .map(o=>({i:o.i, gol:o.c.gol, poin:o.c.poin, name:players[o.i].name}));
+  contestants.sort((a,b)=> b.gol-a.gol || b.poin-a.poin || a.name.localeCompare(b.name));
+  finishGolMatrix.push({ order:contestants.map(c=>c.i), total:contestants.length });
 }
-
-// ============================================================
-// INIT
-// ============================================================
-function buildSidebar(){
-  const sb=document.getElementById('sidebar');
-
-  // Group matches by date
-  const dayMap={};
-  const dayOrder=[];
-  MATCHES.forEach((m,i)=>{
-    if(!dayMap[m.date]){dayMap[m.date]=[];dayOrder.push(m.date);}
-    dayMap[m.date].push({m,i});
+players.forEach((p,i)=>{
+  p.finishGolAtRound = finishGolMatrix.map(fm => {
+    const idx = fm.order.indexOf(i);
+    return idx === -1 ? null : {rank: idx+1, total: fm.total};
   });
+});
 
-  // Find current day (last day with any score, or first day)
-  let currentDay=dayOrder[0];
-  dayOrder.forEach(date=>{
-    const hasScore=dayMap[date].some(({i})=>scores[i]!==null);
-    if(hasScore) currentDay=date;
-  });
-  window._dayOrder=dayOrder;
-  window._currentDayIdx=dayOrder.indexOf(currentDay);
+// ---------- STAT CARDS ----------
+const lastRound = MAX_ROUNDS-1; // index terakhir di p.cum (Liga terakhir)
+const lastCol = TOTAL_COLS-1;   // index terakhir di rankAtCol (sama posisinya)
+const leaderIdx = rankMatrix[lastCol][0];
+const leader = players[leaderIdx];
+document.getElementById('statLeader').textContent = leader.name;
+document.getElementById('statLeaderSub').textContent = leader.cum[lastRound].totalPoin + ' poin dari ' + MAX_ROUNDS + ' liga';
+document.getElementById('statMatches').textContent = MAX_ROUNDS + ' / ' + MAX_ROUNDS;
+const activeLast = players.filter(p=>p.cum[lastRound]!==null);
+const avg = activeLast.reduce((s,p)=>s+p.cum[lastRound].totalPoin,0) / activeLast.length;
+document.getElementById('statAvg').textContent = avg.toFixed(1);
 
-  function renderDay(idx){
-    window._currentDayIdx=idx;
-    const date=dayOrder[idx];
-    const matches=dayMap[date];
-    const done=matches.filter(({i})=>scores[i]!==null).length;
+// ---------- CHART GEOMETRY ----------
+// Lebar chart mengikuti jumlah kolom (liga) supaya tetap terbaca & bisa discroll
+// ke kanan-kiri saat jumlah liga bertambah banyak, tanpa membuat halaman melebar.
+const svgNS = 'http://www.w3.org/2000/svg';
+const H = 520;
+const padL = 130, padR = 160, padT = 24, padB = 44;
+const colWidth = 120; // jarak minimum antar kolom liga
+const innerW = TOTAL_COLS > 1 ? (TOTAL_COLS - 1) * colWidth : colWidth;
+const W = padL + padR + innerW;
+const innerH = H - padT - padB;
+const n = N_PLAYERS;
+const rowH = innerH / (n-1);
 
-    document.getElementById('day-label').textContent=date;
-    document.getElementById('day-sub').textContent=`${done}/${matches.length} selesai`;
-    document.getElementById('day-prev').disabled=(idx===0);
-    document.getElementById('day-next').disabled=(idx===dayOrder.length-1);
+function xForCol(c){ return padL + (TOTAL_COLS===1 ? innerW/2 : (innerW * c/(TOTAL_COLS-1))); }
+function yForRank(rank){ return padT + rank*rowH; }
 
-    let html='';
-    matches.forEach(({m,i})=>{
-      const s=scores[i],done=s!==null;
-      const hasil=done?(s[0]>s[1]?`✅ ${m.t1.split(' ')[0]} menang`:s[1]>s[0]?`✅ ${m.t2.split(' ')[0]} menang`:'🤝 Seri'):'';
-      html+=`<div class="match-item">
-        <div class="match-header" style="cursor:default">
-          <span class="match-num">M${m.no}</span>
-          <div class="match-flags">
-            <span class="flag">${flag(m.t1)}</span>
-            <span class="match-vs">vs</span>
-            <span class="flag">${flag(m.t2)}</span>
-            <span class="match-name">${m.t1} vs ${m.t2}</span>
-          </div>
-          <span class="match-status ${done?'status-done':'status-pending'}">${done?s[0]+' — '+s[1]:'⏳'}</span>
-        </div>
-        ${done?`<div style="font-size:10px;color:#3dbd6a;padding:2px 12px 6px 36px;">${hasil}</div>`:''}
-      </div>`;
-    });
-    document.getElementById('day-matches').innerHTML=html;
+// Membuat svg mengisi penuh lebar panel saat datanya sedikit, tapi berubah
+// menjadi lebar tetap (memicu scroll horizontal di dalam .chart-scroll)
+// begitu jumlah liga sudah membuat chart lebih lebar dari panelnya.
+function fitSvgToContainer(svg){
+  const wrapper = svg.parentElement;
+  function apply(){
+    const availW = wrapper.clientWidth;
+    if(W <= availW){
+      svg.style.width = '100%';
+      svg.style.height = 'auto';
+    } else {
+      svg.style.width = W + 'px';
+      svg.style.height = H + 'px';
+    }
   }
+  apply();
+  window.addEventListener('resize', apply);
+}
 
-  sb.innerHTML=`
-    <div class="day-nav">
-      <button class="day-nav-btn" id="day-prev" onclick="window._navDay(-1)">&#8249;</button>
-      <div style="text-align:center">
-        <div class="day-nav-label" id="day-label"></div>
-        <div class="day-nav-sub" id="day-sub"></div>
-      </div>
-      <button class="day-nav-btn" id="day-next" onclick="window._navDay(1)">&#8250;</button>
-    </div>
-    <div id="day-matches"></div>
+function el(tag, attrs){
+  const e = document.createElementNS(svgNS, tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+function drawAxes(svg){
+  for(let rank=0; rank<n; rank++){
+    const y = yForRank(rank);
+    svg.appendChild(el('line',{x1:padL,y1:y,x2:W-padR,y2:y,class:'grid-line'}));
+  }
+  for(let c=0; c<TOTAL_COLS; c++){
+    const x = xForCol(c);
+    svg.appendChild(el('line',{x1:x,y1:padT-8,x2:x,y2:H-padB+6,class:'grid-line'}));
+    const t = el('text',{x:x,y:H-padB+26,class: c===0 ? 'col-label zero' : 'col-label','text-anchor':'middle'});
+    t.textContent = 'Liga ' + c;
+    svg.appendChild(t);
+  }
+}
+
+// tooltip content untuk kolom c: c=0 (Liga 0) tidak ada data pertandingan
+function tooltipRowsPoin(p, c){
+  if(c===0){
+    return `
+      <div class="t-row"><span>Liga</span><b>0</b></div>
+      <div class="t-row"><span>Keterangan</span><b>Urutan awal (A–Z)</b></div>
+    `;
+  }
+  const r = c-1;
+  const rd = p.cum[r];
+  const finish = p.finishAtRound[r];
+  const finishText = rd.carried ? 'Tidak main' : (finish ? `#${finish.rank} dari ${finish.total}` : '-');
+  return `
+    <div class="t-row"><span>Liga</span><b>${r+1}${rd.carried?' (tidak main)':''}</b></div>
+    <div class="t-row"><span>Tim</span><b>${rd.team}</b></div>
+    <div class="t-row"><span>Total gol</span><b>${rd.gol}</b></div>
+    <div class="t-row"><span>Total poin liga ini</span><b>${rd.poin}</b></div>
+    <div class="t-row"><span>Finish urutan</span><b>${finishText}</b></div>
   `;
-
-  window._navDay=function(dir){
-    const newIdx=window._currentDayIdx+dir;
-    if(newIdx>=0&&newIdx<window._dayOrder.length) renderDay(newIdx);
-  };
-
-  renderDay(window._currentDayIdx);
 }
-function toggleScore(i){}
-function updateScore(i){}
-buildSidebar();
-render();
+function tooltipRowsGol(p, c){
+  if(c===0){
+    return `
+      <div class="t-row"><span>Liga</span><b>0</b></div>
+      <div class="t-row"><span>Keterangan</span><b>Urutan awal (A–Z)</b></div>
+    `;
+  }
+  const r = c-1;
+  const rd = p.cum[r];
+  const finish = p.finishGolAtRound[r];
+  const finishText = rd.carried ? 'Tidak main' : (finish ? `#${finish.rank} dari ${finish.total}` : '-');
+  return `
+    <div class="t-row"><span>Liga</span><b>${r+1}${rd.carried?' (tidak main)':''}</b></div>
+    <div class="t-row"><span>Tim</span><b>${rd.team}</b></div>
+    <div class="t-row"><span>Total gol</span><b>${rd.gol}</b></div>
+    <div class="t-row"><span>Total poin liga ini</span><b>${rd.poin}</b></div>
+    <div class="t-row"><span>Finish urutan gol</span><b>${finishText}</b></div>
+  `;
+}
+
+function renderChart(svg, rankAtColKey, tooltipRowsFn, endLabelFn){
+  drawAxes(svg);
+
+  // sebuah kolom "punya data" kalau pemain sudah pernah join (baik main beneran
+  // maupun cuma carry-over/skip). Sebelum pemain join (belum pernah main sama
+  // sekali), kolomnya null.
+  function hasRank(p, c){ return p[rankAtColKey][c] !== null; }
+  function isCarried(p, c){ return c>0 && p.cum[c-1].carried; }
+
+  // garis: hanya disambung antar kolom yang BERURUTAN (selisih 1). Kalau pemain
+  // baru gabung belakangan (mis. baru main di Liga 4), tidak ada garis yang
+  // "melompat" dari Liga 0 ke Liga 4 — dia baru muncul mulai dari liga dia main.
+  // Segmen yang melewati liga yang di-skip/carry digambar putus-putus (dashed)
+  // supaya kelihatan bedanya dari liga yang benar-benar dimainkan.
+  players.forEach(p=>{
+    let prevC = null;
+    for(let c=0;c<TOTAL_COLS;c++){
+      if(!hasRank(p,c)){ prevC = null; continue; }
+      if(prevC !== null && c - prevC === 1){
+        const x1 = xForCol(prevC), y1 = yForRank(p[rankAtColKey][prevC]);
+        const x2 = xForCol(c),     y2 = yForRank(p[rankAtColKey][c]);
+        const dashed = isCarried(p,c) || isCarried(p,prevC);
+        const cls = 'line-path' + (dashed ? ' dashed' : '');
+        svg.appendChild(el('path',{d:`M${x1} ${y1} L${x2} ${y2}`, class:cls, stroke:p.color}));
+      }
+      prevC = c;
+    }
+  });
+
+  // titik + label: tampil di semua kolom yang punya data (termasuk liga yang di-carry),
+  // supaya titik finish selalu ada untuk semua pemain. Titik Liga0/carry ditandai pudar.
+  players.forEach((p)=>{
+    const visibleCols = [];
+    for(let c=0;c<TOTAL_COLS;c++) if(hasRank(p,c)) visibleCols.push(c);
+    const firstC = visibleCols[0];
+    const lastC = visibleCols[visibleCols.length-1];
+
+    visibleCols.forEach(c=>{
+      const x = xForCol(c), y = yForRank(p[rankAtColKey][c]);
+      const isZero = c===0;
+      const faded = isZero || isCarried(p,c);
+      const pointClass = faded ? 'point zero' : 'point';
+      const circ = el('circle',{cx:x,cy:y,r:6,class:pointClass,fill:p.color});
+      circ.addEventListener('mousemove',(e)=>{
+        tooltip.innerHTML = `
+          <div class="t-name" style="color:${p.color}">${p.name}</div>
+          ${tooltipRowsFn(p, c)}
+        `;
+        tooltip.style.left = (e.clientX+16)+'px';
+        tooltip.style.top = (e.clientY+12)+'px';
+        tooltip.classList.add('show');
+      });
+      circ.addEventListener('mouseleave', ()=> tooltip.classList.remove('show'));
+      svg.appendChild(circ);
+
+      if(c===firstC){
+        const t1 = el('text',{x:x-14,y:y+4,class:'name-tag','text-anchor':'end',fill:p.color});
+        t1.textContent = p.name;
+        svg.appendChild(t1);
+      }
+      if(c===lastC){
+        const t2 = el('text',{x:x+14,y:y+4,class:'name-tag','text-anchor':'start',fill:p.color});
+        t2.textContent = p.name;
+        svg.appendChild(t2);
+        const t3 = el('text',{x:x+14,y:y+17,class:'sub-tag','text-anchor':'start'});
+        t3.textContent = endLabelFn(p, c);
+        svg.appendChild(t3);
+      }
+    });
+  });
+}
+
+const tooltip = document.getElementById('tooltip');
+
+// ---------- CHART 1: PERJALANAN POIN ----------
+const svg = document.getElementById('chart');
+svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+renderChart(svg, 'rankAtCol', tooltipRowsPoin, (p,c)=> (c===0 ? 'A–Z' : p.cum[c-1].totalPoin + ' poin'));
+fitSvgToContainer(svg);
+
+// ---------- LEGEND (peringkat akhir) ----------
+const legend = document.getElementById('legend');
+const finalOrder = rankMatrix[lastCol].map(i=>players[i]);
+finalOrder.forEach((p,idx)=>{
+  const item = document.createElement('div');
+  item.className='legend-item';
+  item.innerHTML = `<span class="dot" style="background:${p.color}"></span><b>#${idx+1} ${p.name}</b> · <span class="pts">${p.cum[lastRound].totalPoin} poin</span>`;
+  legend.appendChild(item);
+});
+
+// ---------- CHART 2: SEPATU EMAS (berdasarkan gol) ----------
+const golSvg = document.getElementById('golChart');
+golSvg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+renderChart(golSvg, 'golRankAtCol', tooltipRowsGol, (p,c)=> (c===0 ? 'A–Z' : p.cum[c-1].totalGol + ' gol'));
+fitSvgToContainer(golSvg);
+
+// ---------- SEPATU EMAS (TOP SCORER) ----------
+const goldenBoot = document.getElementById('goldenBoot');
+const scorers = players
+  .map(p=>{
+    const lastCum = [...p.cum].reverse().find(c=>c!==null);
+    return { name:p.name, color:p.color, totalGol: lastCum ? lastCum.totalGol : 0 };
+  })
+  .sort((a,b)=> b.totalGol - a.totalGol || a.name.localeCompare(b.name));
+
+scorers.forEach((s,idx)=>{
+  const item = document.createElement('div');
+  item.className='legend-item';
+  const medal = idx===0 ? ' 🥇' : '';
+  item.innerHTML = `<span class="dot" style="background:${s.color}"></span><b>#${idx+1} ${s.name}${medal}</b> · <span class="pts">${s.totalGol} gol</span>`;
+  goldenBoot.appendChild(item);
+});
 </script>
 </body>
 </html>
