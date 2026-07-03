@@ -148,47 +148,41 @@
   </div>
 </div>
 
-<footer>Data: Liga 1st, 2nd, 3rd &amp; 4th · Update manual</footer>
+<footer id="footerInfo">Data: Liga 1st · Update manual</footer>
 <div class="tooltip" id="tooltip"></div>
 
 <script>
 // ---------- RAW DATA (entries keyed by nomor liga, 1-based) ----------
+// Cara update tiap ada match baru: tambahkan key liga berikutnya (mis. 2:{...})
+// di object `entries` masing-masing pemain yang ikut liga tsb. Pemain yang belum
+// pernah ikut liga manapun cukup ditambahkan sebagai object baru kapan pun dia mulai main.
 const players = [
   { name:'Vando',  color:'#4d8cf5', entries:{
-      1:{team:'Spain',         poin:15, gol:33},
-      2:{team:'PSG',           poin:4,  gol:12},
-      3:{team:'PSG',           poin:12, gol:14},
-      4:{team:'PSG',           poin:4,  gol:12},
+      1:{team:'Spain',        poin:15, gol:33},
+      2:{team:'PSG',          poin:24, gol:69},
   }},
   { name:'Fadhil', color:'#ec5fb0', entries:{
-      1:{team:'England',       poin:12, gol:26},
-      2:{team:'Real Madrid',   poin:3,  gol:9},
-      3:{team:'Real Madrid',   poin:22, gol:12},
+      1:{team:'England',      poin:12, gol:26},
+      2:{team:'Real Madrid',  poin:10, gol:58},
   }},
   { name:'Gilang', color:'#f5b942', entries:{
-      1:{team:'France',        poin:10, gol:32},
-      2:{team:'Liverpool',     poin:13, gol:11},
+      1:{team:'France',       poin:10, gol:32},
+      2:{team:'Liverpool',    poin:10, gol:42},
   }},
   { name:'Ikiw',   color:'#3ec6a8', entries:{
-      1:{team:'Argentina',     poin:10, gol:19},
-      2:{team:'Bayern Munchen',poin:2,  gol:10},
+      1:{team:'Argentina',    poin:10, gol:19},
+      2:{team:'Bayern Munchen',poin:18, gol:42},
   }},
   { name:'Robi',   color:'#9b7cf0', entries:{
-      1:{team:'Germany',       poin:9,  gol:28},
-      3:{team:'Liverpool',     poin:9,  gol:1},
+      1:{team:'Germany',      poin:9,  gol:28},
+      2:{team:'Barcelona',    poin:18, gol:46},
   }},
   { name:'Reza',   color:'#38b6d9', entries:{
-      1:{team:'Portugal',      poin:4,  gol:15},
-      3:{team:'Bayern Munchen',poin:9,  gol:4},
-      4:{team:'Bayern Munchen',poin:9,  gol:4},
+      1:{team:'Portugal',     poin:4,  gol:15},
   }},
   { name:'Bayu',   color:'#ef6a5f', entries:{
-      1:{team:'Brazil',        poin:1,  gol:21},
-      2:{team:'Arsenal',       poin:11, gol:8},
-      4:{team:'Real Madrid',   poin:3,  gol:52},
-  }},
-  { name:'Rustam', color:'#c084fc', entries:{
-      4:{team:'Liverpool',     poin:13, gol:11},
+      1:{team:'Brazil',       poin:1,  gol:21},
+      2:{team:'Arsenal',      poin:6,  gol:33},
   }},
 ];
 
@@ -517,6 +511,17 @@ scorers.forEach((s,idx)=>{
   item.innerHTML = `<span class="dot" style="background:${s.color}"></span><b>#${idx+1} ${s.name}${medal}</b> · <span class="pts">${s.totalGol} gol</span>`;
   goldenBoot.appendChild(item);
 });
+
+// footer otomatis, contoh: "Data: Liga 1st, 2nd & 3rd · Update manual"
+function ordinal(num){
+  const s = ['th','st','nd','rd'], v = num % 100;
+  return num + (s[(v-20)%10] || s[v] || s[0]);
+}
+const ordinals = Array.from({length:MAX_ROUNDS}, (_,i)=> ordinal(i+1));
+const ligaListText = ordinals.length <= 1
+  ? ordinals.join('')
+  : ordinals.slice(0,-1).join(', ') + ' & ' + ordinals[ordinals.length-1];
+document.getElementById('footerInfo').textContent = 'Data: Liga ' + ligaListText + ' · Update manual';
 </script>
 </body>
 </html>
