@@ -148,7 +148,7 @@
   </div>
 </div>
 
-<footer id="footerInfo">Data: Liga 1st · Kamis, 9 Juli 2026 · 11:18 WIB</footer>
+<footer id="footerInfo">Data: Liga 1st · Jumat, 10 Juli 2026 · 14:16 WIB</footer>
 <div class="tooltip" id="tooltip"></div>
 
 <script>
@@ -166,11 +166,13 @@ const players = [
       1:{team:'England',      poin:12, gol:26},
       2:{team:'Real Madrid',  poin:10, gol:58},
       3:{team:'Bayern Munchen',poin:3,  gol:22},
+      4:{team:'PSG',          poin:12, gol:39},
   }},
   { name:'Gilang', color:'#f5b942', entries:{
       1:{team:'France',       poin:10, gol:32},
       2:{team:'Liverpool',    poin:10, gol:42},
       3:{team:'Barcelona',    poin:9,  gol:36},
+      4:{team:'Barcelona',    poin:12, gol:43},
   }},
   { name:'Ikiw',   color:'#3ec6a8', entries:{
       1:{team:'Argentina',    poin:10, gol:19},
@@ -180,14 +182,17 @@ const players = [
       1:{team:'Germany',      poin:9,  gol:28},
       2:{team:'Barcelona',    poin:18, gol:46},
       3:{team:'Liverpool',    poin:16, gol:31},
+      4:{team:'Liverpool',    poin:24, gol:47},
   }},
   { name:'Reza',   color:'#38b6d9', entries:{
       1:{team:'Portugal',     poin:4,  gol:15},
+      4:{team:'Arsenal',      poin:6,  gol:26},
   }},
   { name:'Bayu',   color:'#ef6a5f', entries:{
       1:{team:'Brazil',       poin:1,  gol:21},
       2:{team:'Arsenal',      poin:6,  gol:33},
       3:{team:'Real Madrid',  poin:13, gol:27},
+      4:{team:'Real Madrid',  poin:6,  gol:36},
   }},
 ];
 
@@ -520,7 +525,7 @@ scorers.forEach((s,idx)=>{
 // footer otomatis, contoh: "Data: Liga 1st, 2nd & 3rd · Kamis, 9 Juli 2026 · 11:18 WIB"
 // LAST_UPDATED_AT: timestamp saat data ini terakhir di-update (bukan waktu real-time
 // pembaca) — tinggal ganti baris ini tiap kali ada update data baru.
-const LAST_UPDATED_AT = 'Kamis, 9 Juli 2026 · 11:18 WIB';
+const LAST_UPDATED_AT = 'Jumat, 10 Juli 2026 · 14:16 WIB';
 function ordinal(num){
   const s = ['th','st','nd','rd'], v = num % 100;
   return num + (s[(v-20)%10] || s[v] || s[0]);
