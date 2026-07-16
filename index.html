@@ -148,7 +148,7 @@
   </div>
 </div>
 
-<footer id="footerInfo">Data: Liga 1st · Senin, 13 Juli 2026 · 13:26 WIB</footer>
+<footer id="footerInfo">Data: Liga 1st · Kamis, 16 Juli 2026 · 12:49 WIB</footer>
 <div class="tooltip" id="tooltip"></div>
 
 <script>
@@ -162,6 +162,7 @@ const players = [
       2:{team:'PSG',          poin:24, gol:69},
       3:{team:'PSG',          poin:18, gol:47},
       5:{team:'PSG',          poin:24, gol:45},
+      6:{team:'Spain',        poin:19, gol:45},
   }},
   { name:'Fadhil', color:'#ec5fb0', entries:{
       1:{team:'England',      poin:12, gol:26},
@@ -169,6 +170,7 @@ const players = [
       3:{team:'Bayern Munchen',poin:3,  gol:22},
       4:{team:'PSG',          poin:12, gol:39},
       5:{team:'Barcelona',    poin:19, gol:44},
+      6:{team:'Argentina',    poin:12, gol:30},
   }},
   { name:'Gilang', color:'#f5b942', entries:{
       1:{team:'France',       poin:10, gol:32},
@@ -176,6 +178,7 @@ const players = [
       3:{team:'Barcelona',    poin:9,  gol:36},
       4:{team:'Barcelona',    poin:12, gol:43},
       5:{team:'Arsenal',      poin:15, gol:27},
+      6:{team:'England',      poin:10, gol:33},
   }},
   { name:'Ikiw',   color:'#3ec6a8', entries:{
       1:{team:'Argentina',    poin:10, gol:19},
@@ -188,6 +191,7 @@ const players = [
       3:{team:'Liverpool',    poin:16, gol:31},
       4:{team:'Liverpool',    poin:24, gol:47},
       5:{team:'Liverpool',    poin:21, gol:42},
+      6:{team:'Brasil',       poin:15, gol:32},
   }},
   { name:'Reza',   color:'#38b6d9', entries:{
       1:{team:'Portugal',     poin:4,  gol:15},
@@ -199,6 +203,7 @@ const players = [
       3:{team:'Real Madrid',  poin:13, gol:27},
       4:{team:'Real Madrid',  poin:6,  gol:36},
       5:{team:'Bayern Munchen',poin:0,  gol:10},
+      6:{team:'France',       poin:10, gol:25},
   }},
 ];
 
@@ -531,7 +536,7 @@ scorers.forEach((s,idx)=>{
 // footer otomatis, contoh: "Data: Liga 1st, 2nd & 3rd · Kamis, 9 Juli 2026 · 11:18 WIB"
 // LAST_UPDATED_AT: timestamp saat data ini terakhir di-update (bukan waktu real-time
 // pembaca) — tinggal ganti baris ini tiap kali ada update data baru.
-const LAST_UPDATED_AT = 'Senin, 13 Juli 2026 · 13:26 WIB';
+const LAST_UPDATED_AT = 'Kamis, 16 Juli 2026 · 12:49 WIB';
 function ordinal(num){
   const s = ['th','st','nd','rd'], v = num % 100;
   return num + (s[(v-20)%10] || s[v] || s[0]);
