@@ -44,6 +44,54 @@
   .card .sub{color:var(--muted);font-size:12px;margin-top:4px;}
   .card .value.gold{color:var(--gold);}
 
+  .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+  .fact-card{
+    background:var(--panel);border:1px solid var(--border);border-radius:14px;
+    padding:16px 18px;
+  }
+  .fact-card .ficon{font-size:19px;margin-bottom:8px;line-height:1;}
+  .fact-card .ftitle{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px;}
+  .fact-card .ftext{font-size:13px;line-height:1.55;color:var(--text);}
+  .fact-card .ftext b{color:var(--gold);font-weight:700;}
+
+  .search-wrap{position:relative;margin-bottom:16px;}
+  .search-wrap input{
+    width:100%;box-sizing:border-box;background:var(--panel);border:1px solid var(--border);
+    border-radius:12px;padding:12px 16px;color:var(--text);font-size:13.5px;font-family:inherit;
+    outline:none;transition:border-color .15s ease;
+  }
+  .search-wrap input:focus{border-color:var(--gold);}
+  .search-wrap input::placeholder{color:var(--muted);}
+
+  .search-result{
+    margin-top:10px;background:var(--panel);border:1px solid var(--gold);border-radius:12px;
+    padding:14px 18px;display:none;
+  }
+  .search-result.show{display:block;}
+  .search-result .sr-title{font-weight:700;font-size:14px;margin-bottom:10px;color:var(--gold);}
+  .search-result .sr-empty{color:var(--muted);font-size:12.5px;}
+  .search-result table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .search-result th{text-align:left;color:var(--muted);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;padding:4px 8px 6px;border-bottom:1px solid var(--border);}
+  .search-result td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.04);}
+  .search-result td.sr-name{font-weight:700;}
+  .search-result tr:last-child td{border-bottom:none;}
+
+  /* --- highlight / dim saat search aktif --- */
+  .player-group{transition:opacity .18s ease;}
+  .player-group.dim{opacity:.1;}
+  .player-group.hl .line-path{stroke-width:3.5;opacity:1;}
+  .player-group.hl .point{stroke:#fff;stroke-width:2;}
+  .player-group.hl .name-tag{font-size:13px;}
+
+  .legend-item{transition:opacity .18s ease;border-radius:8px;padding:2px 6px;margin:-2px -6px;}
+  .legend-item.dim{opacity:.3;}
+  .legend-item.hl{background:rgba(255,255,255,.07);}
+  .legend-item.hl b{text-decoration:underline;}
+
+  .col-grid.hl{stroke:var(--gold);stroke-width:2;opacity:1;}
+  .col-label.hl{fill:var(--gold);font-weight:800;}
+  circle.point.hl{stroke:var(--gold);stroke-width:3;r:8;}
+
   .charts-row{display:flex;gap:16px;align-items:stretch;}
   .charts-row .chart-panel{flex:1 1 0;min-width:0;margin-top:0;}
 
@@ -101,6 +149,7 @@
 
   @media (max-width: 860px){
     .charts-row{flex-direction:column;}
+    .facts{grid-template-columns:1fr;}
   }
 </style>
 </head>
@@ -114,6 +163,11 @@
   </div>
 </header>
 
+<div class="search-wrap">
+  <input type="text" id="searchInput" placeholder="🔍 Cari nama pemain (mis. Fadhil) atau liga (mis. Liga 5)...">
+  <div class="search-result" id="searchResult"></div>
+</div>
+
 <div class="stats">
   <div class="card">
     <div class="label">Pemimpin Sementara</div>
@@ -126,9 +180,27 @@
     <div class="sub">dari total data yang diinput</div>
   </div>
   <div class="card">
-    <div class="label">Rata-rata Poin</div>
-    <div class="value" id="statAvg">—</div>
-    <div class="sub">poin per peserta yang sudah main</div>
+    <div class="label">Pencetak Gol Terbanyak</div>
+    <div class="value gold" id="statTopScorer">—</div>
+    <div class="sub" id="statTopScorerSub">—</div>
+  </div>
+</div>
+
+<div class="facts">
+  <div class="fact-card">
+    <div class="ficon">🔥</div>
+    <div class="ftitle">Duel Ketat di Puncak</div>
+    <div class="ftext" id="factClose">—</div>
+  </div>
+  <div class="fact-card">
+    <div class="ficon">⚡</div>
+    <div class="ftitle">Performa Terbaik 1 Liga</div>
+    <div class="ftext" id="factBest">—</div>
+  </div>
+  <div class="fact-card">
+    <div class="ficon">🎯</div>
+    <div class="ftitle">Paling Rajin Main</div>
+    <div class="ftext" id="factConsistent">—</div>
   </div>
 </div>
 
@@ -152,6 +224,31 @@
 <div class="tooltip" id="tooltip"></div>
 
 <script>
+// ============================================================================
+// PANDUAN UPDATE DATA (baca ini tiap mau update liga baru dari screenshot Excel)
+// ============================================================================
+// 1. Tambahkan key liga baru (mis. 11:{...}) ke object `entries` tiap pemain yang
+//    ikut liga tsb. Pemain yang skip/absen di liga itu TIDAK perlu ditambahkan
+//    apa-apa — sistem otomatis anggap dia "carry" (garis dashed di grafik).
+// 2. Kalau ada pemain baru yang baru pertama kali main, tinggal tambah entry-nya
+//    kapan pun dia mulai (nggak perlu isi liga2 sebelumnya).
+// 3. Kalau screenshot ada baris liga tapi kolom Poin/Gol-nya KOSONG (hasil belum
+//    diinput), JANGAN dikarang angkanya — lewati liga itu utk pemain tsb (biarkan
+//    seperti dia skip). Nanti tambahkan begitu datanya sudah lengkap.
+// 4. Update LAST_UPDATED_AT (cari di bawah, dekat bagian FOOTER) ke tanggal & jam
+//    saat ini, format: "Hari, Tanggal Bulan Tahun · HH:MM WIB". Footer teks
+//    liganya (Liga 1st, 2nd, dst) otomatis ter-generate, TIDAK perlu diedit manual.
+// 5. Semua stat card (Pemimpin Sementara, Liga Selesai, Pencetak Gol Terbanyak),
+//    kedua grafik, legend, DAN 3 "Fakta Unik" di bawah stat card SEMUA otomatis
+//    kehitung ulang dari `players` — tidak perlu diedit manual satu-satu.
+// 6. WAJIB cek 3x setiap habis update (jangan cuma 1x):
+//      a) node --check pada JS yang diekstrak dari tag script -> pastikan sintaks valid
+//      b) render via jsdom (atau buka di browser) -> pastikan statLeader/statTopScorer/
+//         facts/legend terisi, angka totalnya cocok manual dgn screenshot, no console error
+//      c) khusus cek: pemain yg skip liga -> segmennya harus 'dashed', dan SEMUA pemain
+//         tetap dapat titik finish di kolom liga terakhir (baik chart Poin maupun Gol)
+// ============================================================================
+
 // ---------- RAW DATA (entries keyed by nomor liga, 1-based) ----------
 // Cara update tiap ada match baru: tambahkan key liga berikutnya (mis. 2:{...})
 // di object `entries` masing-masing pemain yang ikut liga tsb. Pemain yang belum
@@ -339,9 +436,46 @@ const leader = players[leaderIdx];
 document.getElementById('statLeader').textContent = leader.name;
 document.getElementById('statLeaderSub').textContent = leader.cum[lastRound].totalPoin + ' poin dari ' + MAX_ROUNDS + ' liga';
 document.getElementById('statMatches').textContent = MAX_ROUNDS + ' / ' + MAX_ROUNDS;
-const activeLast = players.filter(p=>p.cum[lastRound]!==null);
-const avg = activeLast.reduce((s,p)=>s+p.cum[lastRound].totalPoin,0) / activeLast.length;
-document.getElementById('statAvg').textContent = avg.toFixed(1);
+
+const topScorerIdx = golRankMatrix[lastCol][0];
+const topScorer = players[topScorerIdx];
+document.getElementById('statTopScorer').textContent = topScorer.name;
+document.getElementById('statTopScorerSub').textContent = topScorer.cum[lastRound].totalGol + ' gol dari ' + MAX_ROUNDS + ' liga';
+
+// ---------- FAKTA UNIK (otomatis dihitung ulang tiap data berubah) ----------
+
+// 1) selisih poin #1 vs #2 di klasemen poin
+const topTwoPoin = rankMatrix[lastCol].slice(0,2).map(i=>players[i]);
+if(topTwoPoin.length >= 2){
+  const [p1, p2] = topTwoPoin;
+  const poin1 = p1.cum[lastRound].totalPoin, poin2 = p2.cum[lastRound].totalPoin;
+  const gap = poin1 - poin2;
+  document.getElementById('factClose').innerHTML = gap === 0
+    ? `<b>${p1.name}</b> & <b>${p2.name}</b> imbang persis di puncak klasemen poin (${poin1} poin)!`
+    : `Cuma beda <b>${gap} poin</b> — ${p1.name} (${poin1}) unggul tipis atas ${p2.name} (${poin2}) di puncak klasemen.`;
+} else {
+  document.getElementById('factClose').textContent = 'Belum cukup data buat dibandingkan.';
+}
+
+// 2) performa terbaik dalam satu liga (poin tertinggi di satu pertandingan, bukan akumulasi)
+let bestEntry = null;
+players.forEach(p=>{
+  Object.entries(p.entries).forEach(([round, e])=>{
+    if(!bestEntry || e.poin > bestEntry.poin || (e.poin === bestEntry.poin && e.gol > bestEntry.gol)){
+      bestEntry = { name:p.name, team:e.team, round:Number(round), poin:e.poin, gol:e.gol };
+    }
+  });
+});
+document.getElementById('factBest').innerHTML = bestEntry
+  ? `<b>${bestEntry.name}</b> cetak ${bestEntry.poin} poin (${bestEntry.gol} gol) bareng ${bestEntry.team} di Liga ${bestEntry.round} — performa 1-liga terbaik sejauh ini.`
+  : '—';
+
+// 3) paling rajin main (jumlah liga yang BENAR-BENAR dimainkan, bukan carry/skip, terbanyak)
+players.forEach(p=>{ p.matchesPlayed = Object.keys(p.entries).length; });
+const maxPlayed = Math.max(...players.map(p=>p.matchesPlayed));
+const mostConsistentNames = players.filter(p=>p.matchesPlayed === maxPlayed).map(p=>`<b>${p.name}</b>`).join(' & ');
+document.getElementById('factConsistent').innerHTML =
+  `${mostConsistentNames} paling rajin — sudah main di ${maxPlayed} dari ${MAX_ROUNDS} liga.`;
 
 // ---------- CHART GEOMETRY ----------
 // Lebar chart mengikuti jumlah kolom (liga) supaya tetap terbaca & bisa discroll
@@ -391,8 +525,8 @@ function drawAxes(svg){
   }
   for(let c=0; c<TOTAL_COLS; c++){
     const x = xForCol(c);
-    svg.appendChild(el('line',{x1:x,y1:padT-8,x2:x,y2:H-padB+6,class:'grid-line'}));
-    const t = el('text',{x:x,y:H-padB+26,class: c===0 ? 'col-label zero' : 'col-label','text-anchor':'middle'});
+    svg.appendChild(el('line',{x1:x,y1:padT-8,x2:x,y2:H-padB+6,class:'grid-line col-grid','data-col':c}));
+    const t = el('text',{x:x,y:H-padB+26,class: (c===0 ? 'col-label zero' : 'col-label'),'data-col':c,'text-anchor':'middle'});
     t.textContent = 'Liga ' + c;
     svg.appendChild(t);
   }
@@ -447,12 +581,16 @@ function renderChart(svg, rankAtColKey, tooltipRowsFn, endLabelFn){
   function hasRank(p, c){ return p[rankAtColKey][c] !== null; }
   function isCarried(p, c){ return c>0 && p.cum[c-1].carried; }
 
-  // garis: hanya disambung antar kolom yang BERURUTAN (selisih 1). Kalau pemain
-  // baru gabung belakangan (mis. baru main di Liga 4), tidak ada garis yang
-  // "melompat" dari Liga 0 ke Liga 4 — dia baru muncul mulai dari liga dia main.
-  // Segmen yang melewati liga yang di-skip/carry digambar putus-putus (dashed)
-  // supaya kelihatan bedanya dari liga yang benar-benar dimainkan.
+  // semua elemen milik satu pemain (garis + titik + label) dikumpulkan dalam
+  // satu <g data-player="..."> supaya gampang di-highlight/dim saat search.
   players.forEach(p=>{
+    const g = el('g', {class:'player-group', 'data-player':p.name});
+
+    // garis: hanya disambung antar kolom yang BERURUTAN (selisih 1). Kalau pemain
+    // baru gabung belakangan (mis. baru main di Liga 4), tidak ada garis yang
+    // "melompat" dari Liga 0 ke Liga 4 — dia baru muncul mulai dari liga dia main.
+    // Segmen yang melewati liga yang di-skip/carry digambar putus-putus (dashed)
+    // supaya kelihatan bedanya dari liga yang benar-benar dimainkan.
     let prevC = null;
     for(let c=0;c<TOTAL_COLS;c++){
       if(!hasRank(p,c)){ prevC = null; continue; }
@@ -461,15 +599,13 @@ function renderChart(svg, rankAtColKey, tooltipRowsFn, endLabelFn){
         const x2 = xForCol(c),     y2 = yForRank(p[rankAtColKey][c]);
         const dashed = isCarried(p,c) || isCarried(p,prevC);
         const cls = 'line-path' + (dashed ? ' dashed' : '');
-        svg.appendChild(el('path',{d:`M${x1} ${y1} L${x2} ${y2}`, class:cls, stroke:p.color}));
+        g.appendChild(el('path',{d:`M${x1} ${y1} L${x2} ${y2}`, class:cls, stroke:p.color}));
       }
       prevC = c;
     }
-  });
 
-  // titik + label: tampil di semua kolom yang punya data (termasuk liga yang di-carry),
-  // supaya titik finish selalu ada untuk semua pemain. Titik Liga0/carry ditandai pudar.
-  players.forEach((p)=>{
+    // titik + label: tampil di semua kolom yang punya data (termasuk liga yang di-carry),
+    // supaya titik finish selalu ada untuk semua pemain. Titik Liga0/carry ditandai pudar.
     const visibleCols = [];
     for(let c=0;c<TOTAL_COLS;c++) if(hasRank(p,c)) visibleCols.push(c);
     const firstC = visibleCols[0];
@@ -480,7 +616,7 @@ function renderChart(svg, rankAtColKey, tooltipRowsFn, endLabelFn){
       const isZero = c===0;
       const faded = isZero || isCarried(p,c);
       const pointClass = faded ? 'point zero' : 'point';
-      const circ = el('circle',{cx:x,cy:y,r:6,class:pointClass,fill:p.color});
+      const circ = el('circle',{cx:x,cy:y,r:6,class:pointClass,fill:p.color,'data-col':c});
       circ.addEventListener('mousemove',(e)=>{
         tooltip.innerHTML = `
           <div class="t-name" style="color:${p.color}">${p.name}</div>
@@ -491,22 +627,24 @@ function renderChart(svg, rankAtColKey, tooltipRowsFn, endLabelFn){
         tooltip.classList.add('show');
       });
       circ.addEventListener('mouseleave', ()=> tooltip.classList.remove('show'));
-      svg.appendChild(circ);
+      g.appendChild(circ);
 
       if(c===firstC){
         const t1 = el('text',{x:x-14,y:y+4,class:'name-tag','text-anchor':'end',fill:p.color});
         t1.textContent = p.name;
-        svg.appendChild(t1);
+        g.appendChild(t1);
       }
       if(c===lastC){
         const t2 = el('text',{x:x+14,y:y+4,class:'name-tag','text-anchor':'start',fill:p.color});
         t2.textContent = p.name;
-        svg.appendChild(t2);
+        g.appendChild(t2);
         const t3 = el('text',{x:x+14,y:y+17,class:'sub-tag','text-anchor':'start'});
         t3.textContent = endLabelFn(p, c);
-        svg.appendChild(t3);
+        g.appendChild(t3);
       }
     });
+
+    svg.appendChild(g);
   });
 }
 
@@ -524,6 +662,7 @@ const finalOrder = rankMatrix[lastCol].map(i=>players[i]);
 finalOrder.forEach((p,idx)=>{
   const item = document.createElement('div');
   item.className='legend-item';
+  item.dataset.player = p.name;
   item.innerHTML = `<span class="dot" style="background:${p.color}"></span><b>#${idx+1} ${p.name}</b> · <span class="pts">${p.cum[lastRound].totalPoin} poin</span>`;
   legend.appendChild(item);
 });
@@ -546,6 +685,7 @@ const scorers = players
 scorers.forEach((s,idx)=>{
   const item = document.createElement('div');
   item.className='legend-item';
+  item.dataset.player = s.name;
   const medal = idx===0 ? ' 🥇' : '';
   item.innerHTML = `<span class="dot" style="background:${s.color}"></span><b>#${idx+1} ${s.name}${medal}</b> · <span class="pts">${s.totalGol} gol</span>`;
   goldenBoot.appendChild(item);
@@ -564,6 +704,110 @@ const ligaListText = ordinals.length <= 1
   ? ordinals.join('')
   : ordinals.slice(0,-1).join(', ') + ' & ' + ordinals[ordinals.length-1];
 document.getElementById('footerInfo').textContent = 'Data: Liga ' + ligaListText + ' · ' + LAST_UPDATED_AT;
+
+// ---------- SEARCH: cari nama pemain -> highlight grafik & legend
+//                     cari "Liga N"   -> tampilkan panel data liga tsb ----------
+const searchInput = document.getElementById('searchInput');
+const searchResult = document.getElementById('searchResult');
+const allPlayerGroups = document.querySelectorAll('.player-group');
+const allLegendItems = document.querySelectorAll('.legend-item');
+const allColGrids = document.querySelectorAll('.col-grid');
+const allColLabels = document.querySelectorAll('.col-label');
+const allPoints = document.querySelectorAll('circle.point');
+
+function clearHighlight(){
+  allPlayerGroups.forEach(g=>g.classList.remove('dim','hl'));
+  allLegendItems.forEach(it=>it.classList.remove('dim','hl'));
+  allColGrids.forEach(g=>g.classList.remove('hl'));
+  allColLabels.forEach(t=>t.classList.remove('hl'));
+  allPoints.forEach(c=>c.classList.remove('hl'));
+  searchResult.classList.remove('show');
+  searchResult.innerHTML = '';
+}
+
+function highlightPlayers(matchedNames){
+  allPlayerGroups.forEach(g=>{
+    const isMatch = matchedNames.includes(g.dataset.player);
+    g.classList.toggle('hl', isMatch);
+    g.classList.toggle('dim', !isMatch);
+  });
+  allLegendItems.forEach(it=>{
+    const isMatch = matchedNames.includes(it.dataset.player);
+    it.classList.toggle('hl', isMatch);
+    it.classList.toggle('dim', !isMatch);
+  });
+}
+
+function showRoundPanel(roundNum){
+  allColGrids.forEach(g=> g.classList.toggle('hl', Number(g.dataset.col) === roundNum));
+  allColLabels.forEach(t=> t.classList.toggle('hl', Number(t.dataset.col) === roundNum));
+  allPoints.forEach(c=> c.classList.toggle('hl', Number(c.dataset.col) === roundNum));
+
+  if(roundNum === 0){
+    searchResult.innerHTML = `<div class="sr-title">Liga 0</div><div class="sr-empty">Ini cuma titik awal (urutan alfabetis) — belum ada pertandingan.</div>`;
+    searchResult.classList.add('show');
+    return;
+  }
+  if(roundNum < 0 || roundNum > MAX_ROUNDS){
+    searchResult.innerHTML = `<div class="sr-title">Liga ${roundNum}</div><div class="sr-empty">Belum ada data untuk liga ini.</div>`;
+    searchResult.classList.add('show');
+    return;
+  }
+
+  const r = roundNum - 1;
+  const contestants = players
+    .map(p=>({p, c:p.cum[r]}))
+    .filter(o=> o.c !== null && !o.c.carried)
+    .sort((a,b)=> b.c.poin - a.c.poin || b.c.gol - a.c.gol || a.p.name.localeCompare(b.p.name));
+
+  if(contestants.length === 0){
+    searchResult.innerHTML = `<div class="sr-title">Liga ${roundNum}</div><div class="sr-empty">Belum ada hasil yang diinput untuk liga ini.</div>`;
+    searchResult.classList.add('show');
+    return;
+  }
+
+  const rows = contestants.map((o,idx)=>
+    `<tr><td>#${idx+1}</td><td class="sr-name" style="color:${o.p.color}">${o.p.name}</td><td>${o.c.team}</td><td>${o.c.poin}</td><td>${o.c.gol}</td></tr>`
+  ).join('');
+  const skipped = players.filter(p=> p.cum[r] === null || p.cum[r].carried);
+  const skippedText = skipped.length
+    ? `<div class="sr-empty" style="margin-top:8px;">Absen liga ini: ${skipped.map(p=>p.name).join(', ')}</div>`
+    : '';
+
+  searchResult.innerHTML = `
+    <div class="sr-title">Liga ${roundNum}</div>
+    <table>
+      <thead><tr><th>#</th><th>Nama</th><th>Tim</th><th>Poin</th><th>Gol</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    ${skippedText}
+  `;
+  searchResult.classList.add('show');
+}
+
+searchInput.addEventListener('input', ()=>{
+  const raw = searchInput.value.trim();
+  if(!raw){ clearHighlight(); return; }
+
+  // deteksi query liga: "liga 5", "liga5", atau cuma angka "5"
+  const ligaMatch = raw.match(/^liga\s*(\d+)$/i) || raw.match(/^(\d+)$/);
+  if(ligaMatch){
+    clearHighlight();
+    showRoundPanel(Number(ligaMatch[1]));
+    return;
+  }
+
+  // cari nama pemain (partial match, case-insensitive)
+  const q = raw.toLowerCase();
+  const matchedNames = players.filter(p=> p.name.toLowerCase().includes(q)).map(p=>p.name);
+  clearHighlight();
+  if(matchedNames.length){
+    highlightPlayers(matchedNames);
+  } else {
+    searchResult.innerHTML = `<div class="sr-empty">Nama pemain atau liga "${raw}" tidak ditemukan.</div>`;
+    searchResult.classList.add('show');
+  }
+});
 </script>
 </body>
 </html>
