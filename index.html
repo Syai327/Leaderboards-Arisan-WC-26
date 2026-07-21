@@ -158,15 +158,9 @@
 <header>
   <div class="logo">⚽</div>
   <div>
-    <h1>Arisan Liga — Progres Poin</h1>
-    <p>Peringkat berubah berdasarkan akumulasi poin tiap liga · Liga 0 = urutan alfabetis (belum ada data)</p>
+    <h1>LEADERBOARD FC26 Ruangan</h1>
   </div>
 </header>
-
-<div class="search-wrap">
-  <input type="text" id="searchInput" placeholder="🔍 Cari nama pemain (mis. Fadhil) atau liga (mis. Liga 5)...">
-  <div class="search-result" id="searchResult"></div>
-</div>
 
 <div class="stats">
   <div class="card">
@@ -204,6 +198,11 @@
   </div>
 </div>
 
+<div class="search-wrap">
+  <input type="text" id="searchInput" placeholder="🔍 Cari nama pemain (mis. Fadhil) atau liga (mis. Liga 5)...">
+  <div class="search-result" id="searchResult"></div>
+</div>
+
 <div class="charts-row">
   <div class="chart-panel">
     <h2>Perjalanan Poin per Liga</h2>
@@ -220,7 +219,7 @@
   </div>
 </div>
 
-<footer id="footerInfo">Data: Liga 1st · Senin, 20 Juli 2026 · 14:57 WIB</footer>
+<footer id="footerInfo">Data di-update pada Senin, 20 Juli 2026 (14:57 WIB)</footer>
 <div class="tooltip" id="tooltip"></div>
 
 <script>
@@ -235,9 +234,8 @@
 // 3. Kalau screenshot ada baris liga tapi kolom Poin/Gol-nya KOSONG (hasil belum
 //    diinput), JANGAN dikarang angkanya — lewati liga itu utk pemain tsb (biarkan
 //    seperti dia skip). Nanti tambahkan begitu datanya sudah lengkap.
-// 4. Update LAST_UPDATED_AT (cari di bawah, dekat bagian FOOTER) ke tanggal & jam
-//    saat ini, format: "Hari, Tanggal Bulan Tahun · HH:MM WIB". Footer teks
-//    liganya (Liga 1st, 2nd, dst) otomatis ter-generate, TIDAK perlu diedit manual.
+// 4. Update LAST_UPDATED_DATE & LAST_UPDATED_TIME (cari di bawah, dekat bagian FOOTER)
+//    ke tanggal & jam saat ini. Footer otomatis jadi "Data di-update pada [tanggal] ([jam] WIB)".
 // 5. Semua stat card (Pemimpin Sementara, Liga Selesai, Pencetak Gol Terbanyak),
 //    kedua grafik, legend, DAN 3 "Fakta Unik" di bawah stat card SEMUA otomatis
 //    kehitung ulang dari `players` — tidak perlu diedit manual satu-satu.
@@ -691,19 +689,11 @@ scorers.forEach((s,idx)=>{
   goldenBoot.appendChild(item);
 });
 
-// footer otomatis, contoh: "Data: Liga 1st, 2nd & 3rd · Kamis, 9 Juli 2026 · 11:18 WIB"
-// LAST_UPDATED_AT: timestamp saat data ini terakhir di-update (bukan waktu real-time
-// pembaca) — tinggal ganti baris ini tiap kali ada update data baru.
-const LAST_UPDATED_AT = 'Senin, 20 Juli 2026 · 14:57 WIB';
-function ordinal(num){
-  const s = ['th','st','nd','rd'], v = num % 100;
-  return num + (s[(v-20)%10] || s[v] || s[0]);
-}
-const ordinals = Array.from({length:MAX_ROUNDS}, (_,i)=> ordinal(i+1));
-const ligaListText = ordinals.length <= 1
-  ? ordinals.join('')
-  : ordinals.slice(0,-1).join(', ') + ' & ' + ordinals[ordinals.length-1];
-document.getElementById('footerInfo').textContent = 'Data: Liga ' + ligaListText + ' · ' + LAST_UPDATED_AT;
+// footer sederhana, contoh: "Data di-update pada Senin, 20 Juli 2026 (14:57 WIB)"
+// tinggal ganti dua baris di bawah ini tiap kali ada update data baru.
+const LAST_UPDATED_DATE = 'Senin, 20 Juli 2026';
+const LAST_UPDATED_TIME = '14:57';
+document.getElementById('footerInfo').textContent = `Data di-update pada ${LAST_UPDATED_DATE} (${LAST_UPDATED_TIME} WIB)`;
 
 // ---------- SEARCH: cari nama pemain -> highlight grafik & legend
 //                     cari "Liga N"   -> tampilkan panel data liga tsb ----------
