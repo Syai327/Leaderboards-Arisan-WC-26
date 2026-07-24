@@ -44,7 +44,7 @@
   .card .sub{color:var(--muted);font-size:12px;margin-top:4px;}
   .card .value.gold{color:var(--gold);}
 
-  .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+  .facts{display:grid;grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));gap:14px;margin-bottom:20px;}
   .fact-card{
     background:var(--panel);border:1px solid var(--border);border-radius:14px;
     padding:16px 18px;
@@ -196,6 +196,16 @@
     <div class="ftitle">Paling Rajin Main</div>
     <div class="ftext" id="factConsistent">—</div>
   </div>
+  <div class="fact-card">
+    <div class="ficon">⚖️</div>
+    <div class="ftitle">Paling Efisien</div>
+    <div class="ftext" id="factEfficient">—</div>
+  </div>
+  <div class="fact-card">
+    <div class="ficon">📈</div>
+    <div class="ftitle">Lagi On Fire</div>
+    <div class="ftext" id="factMomentum">—</div>
+  </div>
 </div>
 
 <div class="search-wrap">
@@ -219,7 +229,7 @@
   </div>
 </div>
 
-<footer id="footerInfo">Data di-update pada Rabu, 22 Juli 2026 (16:34 WIB)</footer>
+<footer id="footerInfo">Data di-update pada Jumat, 24 Juli 2026 (16:13 WIB)</footer>
 <div class="tooltip" id="tooltip"></div>
 
 <script>
@@ -237,7 +247,7 @@
 // 4. Update LAST_UPDATED_DATE & LAST_UPDATED_TIME (cari di bawah, dekat bagian FOOTER)
 //    ke tanggal & jam saat ini. Footer otomatis jadi "Data di-update pada [tanggal] ([jam] WIB)".
 // 5. Semua stat card (Pemimpin Sementara, Liga Selesai, Pencetak Gol Terbanyak),
-//    kedua grafik, legend, DAN 3 "Fakta Unik" di bawah stat card SEMUA otomatis
+//    kedua grafik, legend, DAN 5 "Fakta Unik" di bawah stat card SEMUA otomatis
 //    kehitung ulang dari `players` — tidak perlu diedit manual satu-satu.
 // 6. WAJIB cek 3x setiap habis update (jangan cuma 1x):
 //      a) node --check pada JS yang diekstrak dari tag script -> pastikan sintaks valid
@@ -263,6 +273,7 @@ const players = [
       10:{team:'Belgium',      poin:15, gol:42},
       11:{team:'Arsenal',      poin:25, gol:51},
       12:{team:'Barcelona',    poin:22, gol:41},
+      13:{team:'Cape Verde',   poin:15, gol:28},
   }},
   { name:'Fadhil', color:'#ec5fb0', entries:{
       1:{team:'England',      poin:12, gol:26},
@@ -276,6 +287,7 @@ const players = [
       10:{team:'Norway',      poin:13, gol:40},
       11:{team:'Inter Milan', poin:15, gol:38},
       12:{team:'Inter Milan', poin:11, gol:30},
+      13:{team:'South Africa',poin:12, gol:33},
   }},
   { name:'Gilang', color:'#f5b942', entries:{
       1:{team:'France',       poin:10, gol:32},
@@ -289,6 +301,7 @@ const players = [
       10:{team:'France',      poin:23, gol:45},
       11:{team:'Barcelona',   poin:7,  gol:40},
       12:{team:'PSG',         poin:10, gol:38},
+      13:{team:'Finlandia',   poin:3,  gol:18},
   }},
   { name:'Ikiw',   color:'#3ec6a8', entries:{
       1:{team:'Argentina',    poin:10, gol:19},
@@ -310,6 +323,7 @@ const players = [
       10:{team:'Morocco',     poin:22, gol:47},
       11:{team:'Liverpool',   poin:14, gol:35},
       12:{team:'Bayern Munchen',poin:14, gol:40},
+      13:{team:'Indonesia',      poin:6,  gol:27},
   }},
   { name:'Reza',   color:'#38b6d9', entries:{
       1:{team:'Portugal',     poin:4,  gol:15},
@@ -485,6 +499,54 @@ const maxPlayed = Math.max(...players.map(p=>p.matchesPlayed));
 const mostConsistentNames = players.filter(p=>p.matchesPlayed === maxPlayed).map(p=>`<b>${p.name}</b>`).join(' & ');
 document.getElementById('factConsistent').innerHTML =
   `${mostConsistentNames} paling rajin — sudah main di ${maxPlayed} dari ${MAX_ROUNDS} liga.`;
+
+// 4) paling efisien: rata-rata poin per liga (bukan total akumulasi) — biar nggak bias
+// ke pemain yang cuma menang krn ikut liga lebih banyak. Minimal 3x main biar representatif;
+// kalau nggak ada yg penuhi, turunkan syaratnya ke minimal 1x main.
+function computeMostEfficient(minMatches){
+  const eligible = players.filter(p=>p.matchesPlayed >= minMatches);
+  if(!eligible.length) return null;
+  return eligible.reduce((best,p)=>{
+    const avg = Object.values(p.entries).reduce((s,e)=>s+e.poin,0) / p.matchesPlayed;
+    p._avgPoin = avg;
+    return (!best || avg > best._avgPoin) ? p : best;
+  }, null);
+}
+const mostEfficient = computeMostEfficient(3) || computeMostEfficient(1);
+if(mostEfficient){
+  document.getElementById('factEfficient').innerHTML =
+    `<b>${mostEfficient.name}</b> paling efisien — rata-rata ${mostEfficient._avgPoin.toFixed(1)} poin per liga yang dia mainkan (${mostEfficient.matchesPlayed}x main), tertinggi dibanding pemain lain.`;
+} else {
+  document.getElementById('factEfficient').textContent = 'Belum cukup data buat dihitung.';
+}
+
+// 5) lagi on fire: bandingkan rata-rata poin di liga TERAKHIR yang dia mainkan (maks 3 liga
+// terakhir miliknya) vs rata-rata liga-liga sebelumnya. Butuh minimal 4x main biar ada
+// pembanding "sebelumnya" yang cukup berarti.
+function computeMomentum(){
+  let best = null;
+  players.forEach(p=>{
+    const roundsPlayed = Object.keys(p.entries).map(Number).sort((a,b)=>a-b);
+    if(roundsPlayed.length < 4) return;
+    const windowSize = Math.min(3, Math.floor(roundsPlayed.length/2));
+    const recentRounds = roundsPlayed.slice(-windowSize);
+    const priorRounds = roundsPlayed.slice(0, roundsPlayed.length - windowSize);
+    const avg = (rounds)=> rounds.reduce((s,r)=>s+p.entries[r].poin,0) / rounds.length;
+    const avgRecent = avg(recentRounds), avgPrior = avg(priorRounds);
+    const delta = avgRecent - avgPrior;
+    if(!best || delta > best.delta){
+      best = { name:p.name, delta, avgRecent, avgPrior, windowSize };
+    }
+  });
+  return best;
+}
+const momentum = computeMomentum();
+if(momentum && momentum.delta > 0){
+  document.getElementById('factMomentum').innerHTML =
+    `<b>${momentum.name}</b> lagi naik daun — rata-rata ${momentum.avgRecent.toFixed(1)} poin di ${momentum.windowSize} liga terakhirnya, naik dari rata-rata ${momentum.avgPrior.toFixed(1)} poin sebelumnya.`;
+} else {
+  document.getElementById('factMomentum').textContent = 'Belum ada tren performa yang cukup jelas naik.';
+}
 
 // ---------- CHART GEOMETRY ----------
 // Lebar chart mengikuti jumlah kolom (liga) supaya tetap terbaca & bisa discroll
@@ -702,8 +764,8 @@ scorers.forEach((s,idx)=>{
 
 // footer sederhana, contoh: "Data di-update pada Senin, 20 Juli 2026 (14:57 WIB)"
 // tinggal ganti dua baris di bawah ini tiap kali ada update data baru.
-const LAST_UPDATED_DATE = 'Rabu, 22 Juli 2026';
-const LAST_UPDATED_TIME = '16:34';
+const LAST_UPDATED_DATE = 'Jumat, 24 Juli 2026';
+const LAST_UPDATED_TIME = '16:13';
 document.getElementById('footerInfo').textContent = `Data di-update pada ${LAST_UPDATED_DATE} (${LAST_UPDATED_TIME} WIB)`;
 
 // ---------- SEARCH: cari nama pemain -> highlight grafik & legend
