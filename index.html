@@ -229,7 +229,7 @@
   </div>
 </div>
 
-<footer id="footerInfo">Data di-update pada Jumat, 24 Juli 2026 (16:13 WIB)</footer>
+<footer id="footerInfo">Data di-update pada Senin, 27 Juli 2026 (17:57 WIB)</footer>
 <div class="tooltip" id="tooltip"></div>
 
 <script>
@@ -274,6 +274,7 @@ const players = [
       11:{team:'Arsenal',      poin:25, gol:51},
       12:{team:'Barcelona',    poin:22, gol:41},
       13:{team:'Cape Verde',   poin:15, gol:28},
+      14:{team:'Arsenal',      poin:20, gol:41},
   }},
   { name:'Fadhil', color:'#ec5fb0', entries:{
       1:{team:'England',      poin:12, gol:26},
@@ -288,6 +289,7 @@ const players = [
       11:{team:'Inter Milan', poin:15, gol:38},
       12:{team:'Inter Milan', poin:11, gol:30},
       13:{team:'South Africa',poin:12, gol:33},
+      14:{team:'Inter Milan',poin:12, gol:27},
   }},
   { name:'Gilang', color:'#f5b942', entries:{
       1:{team:'France',       poin:10, gol:32},
@@ -302,6 +304,7 @@ const players = [
       11:{team:'Barcelona',   poin:7,  gol:40},
       12:{team:'PSG',         poin:10, gol:38},
       13:{team:'Finlandia',   poin:3,  gol:18},
+      14:{team:'PSG',         poin:6,  gol:29},
   }},
   { name:'Ikiw',   color:'#3ec6a8', entries:{
       1:{team:'Argentina',    poin:10, gol:19},
@@ -324,6 +327,7 @@ const players = [
       11:{team:'Liverpool',   poin:14, gol:35},
       12:{team:'Bayern Munchen',poin:14, gol:40},
       13:{team:'Indonesia',      poin:6,  gol:27},
+      14:{team:'Barcelona',      poin:14, gol:32},
   }},
   { name:'Reza',   color:'#38b6d9', entries:{
       1:{team:'Portugal',     poin:4,  gol:15},
@@ -342,6 +346,7 @@ const players = [
       10:{team:'England',     poin:16, gol:34},
       11:{team:'Real Madrid', poin:13, gol:22},
       12:{team:'Real Madrid', poin:0,  gol:19},
+      14:{team:'Real Madrid', poin:5,  gol:21},
   }},
 ];
 
@@ -764,8 +769,8 @@ scorers.forEach((s,idx)=>{
 
 // footer sederhana, contoh: "Data di-update pada Senin, 20 Juli 2026 (14:57 WIB)"
 // tinggal ganti dua baris di bawah ini tiap kali ada update data baru.
-const LAST_UPDATED_DATE = 'Jumat, 24 Juli 2026';
-const LAST_UPDATED_TIME = '16:13';
+const LAST_UPDATED_DATE = 'Senin, 27 Juli 2026';
+const LAST_UPDATED_TIME = '17:57';
 document.getElementById('footerInfo').textContent = `Data di-update pada ${LAST_UPDATED_DATE} (${LAST_UPDATED_TIME} WIB)`;
 
 // ---------- SEARCH: cari nama pemain -> highlight grafik & legend
