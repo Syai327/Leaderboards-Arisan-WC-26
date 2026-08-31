@@ -229,7 +229,7 @@
   </div>
 </div>
 
-<footer id="footerInfo">Data di-update pada Selasa, 11 Agustus 2026 (17:53 WIB)</footer>
+<footer id="footerInfo">Data di-update pada Senin, 31 Agustus 2026 (16:10 WIB)</footer>
 <div class="tooltip" id="tooltip"></div>
 
 <script>
@@ -249,12 +249,18 @@
 // 5. Semua stat card (Pemimpin Sementara, Liga Selesai, Pencetak Gol Terbanyak),
 //    kedua grafik, legend, DAN 5 "Fakta Unik" di bawah stat card SEMUA otomatis
 //    kehitung ulang dari `players` — tidak perlu diedit manual satu-satu.
-// 6. WAJIB cek 3x setiap habis update (jangan cuma 1x):
-//      a) node --check pada JS yang diekstrak dari tag script -> pastikan sintaks valid
-//      b) render via jsdom (atau buka di browser) -> pastikan statLeader/statTopScorer/
-//         facts/legend terisi, angka totalnya cocok manual dgn screenshot, no console error
-//      c) khusus cek: pemain yg skip liga -> segmennya harus 'dashed', dan SEMUA pemain
-//         tetap dapat titik finish di kolom liga terakhir (baik chart Poin maupun Gol)
+// 6. CEK CUKUP 1x SETELAH UPDATE (user minta hemat token, jangan diulang 3x lagi):
+//    jalankan 1 script node (pakai jsdom) yang sekaligus: (a) node --check sintaks,
+//    (b) render & baca statLeader/statTopScorer/facts/legend, cocokkan manual dgn
+//    screenshot, (c) pastikan pemain yg skip -> segmennya 'dashed' & SEMUA pemain
+//    tetap dapat titik finish di kolom liga terakhir (chart Poin maupun Gol).
+//    Kalau 1x itu udah pass semua & no console error, LANGSUNG lanjut, jangan cek ulang.
+// 6b. Garis pemain yang baru gabung belakangan (mis. baru main di Liga 4) TETAP
+//     disambung dari Liga 0 (bukan cuma titik muncul tiba2) — tapi segmen sepanjang
+//     periode dia belum join otomatis dashed karena gap kolomnya >1. Ini berlaku
+//     otomatis untuk pemain baru manapun ke depannya.
+// 7. NAMA FILE OUTPUT: selalu "index.html" (BUKAN index_7.html atau nama lain) —
+//    biar user bisa langsung download tanpa rename manual tiap kali update.
 // ============================================================================
 
 // ---------- RAW DATA (entries keyed by nomor liga, 1-based) ----------
@@ -277,6 +283,10 @@ const players = [
       14:{team:'Arsenal',      poin:20, gol:41},
       15:{team:'Manchester United',poin:13, gol:39},
       16:{team:'Bayern Munchen',poin:15, gol:34},
+      17:{team:'Bologna',      poin:12, gol:37},
+      18:{team:'Olympys',      poin:11, gol:27},
+      19:{team:'Chelsea',      poin:17, gol:44},
+      20:{team:'England',      poin:21, gol:55},
   }},
   { name:'Fadhil', color:'#ec5fb0', entries:{
       1:{team:'England',      poin:12, gol:26},
@@ -293,6 +303,10 @@ const players = [
       13:{team:'South Africa',poin:12, gol:33},
       14:{team:'Inter Milan',poin:12, gol:27},
       16:{team:'Barcelona', poin:16, gol:28},
+      17:{team:'Tottenham',    poin:14, gol:31},
+      18:{team:'Aston Villa',  poin:2,  gol:17},
+      19:{team:'Tottenham',    poin:18, gol:42},
+      20:{team:'Brasil',       poin:11, gol:32},
   }},
   { name:'Gilang', color:'#f5b942', entries:{
       1:{team:'France',       poin:10, gol:32},
@@ -310,6 +324,8 @@ const players = [
       14:{team:'PSG',         poin:6,  gol:29},
       15:{team:'Barcelona',   poin:15, gol:45},
       16:{team:'Liverpool',   poin:7,  gol:37},
+      17:{team:'Liverpool',   poin:7,  gol:40},
+      20:{team:'Spain',       poin:7,  gol:37},
   }},
   { name:'Ikiw',   color:'#3ec6a8', entries:{
       1:{team:'Argentina',    poin:10, gol:19},
@@ -336,6 +352,10 @@ const players = [
       14:{team:'Barcelona',      poin:14, gol:32},
       15:{team:'Atletico Madrid',poin:16, gol:38},
       16:{team:'Atletico Madrid',poin:18, gol:36},
+      17:{team:'Como',           poin:14, gol:31},
+      18:{team:'Como',           poin:13, gol:20},
+      19:{team:'Aston Villa',    poin:26, gol:57},
+      20:{team:'Argentina',      poin:15, gol:43},
   }},
   { name:'Reza',   color:'#38b6d9', entries:{
       1:{team:'Portugal',     poin:4,  gol:15},
@@ -357,6 +377,16 @@ const players = [
       14:{team:'Real Madrid', poin:5,  gol:21},
       15:{team:'Arsenal',     poin:4,  gol:23},
       16:{team:'PSG',         poin:2,  gol:20},
+      17:{team:'Real Madrid', poin:7,  gol:31},
+      18:{team:'Real Madrid', poin:7,  gol:22},
+      19:{team:'Manchester City',poin:12, gol:34},
+      20:{team:'France',      poin:4,  gol:25},
+  }},
+  { name:'Raihan', color:'#f97066', entries:{
+      19:{team:'Liverpool',   poin:8,  gol:42},
+  }},
+  { name:'Aga',    color:'#60d4c4', entries:{
+      19:{team:'Arsenal',     poin:4,  gol:24},
   }},
 ];
 
@@ -672,18 +702,17 @@ function renderChart(svg, rankAtColKey, tooltipRowsFn, endLabelFn){
   players.forEach(p=>{
     const g = el('g', {class:'player-group', 'data-player':p.name});
 
-    // garis: hanya disambung antar kolom yang BERURUTAN (selisih 1). Kalau pemain
-    // baru gabung belakangan (mis. baru main di Liga 4), tidak ada garis yang
-    // "melompat" dari Liga 0 ke Liga 4 — dia baru muncul mulai dari liga dia main.
-    // Segmen yang melewati liga yang di-skip/carry digambar putus-putus (dashed)
-    // supaya kelihatan bedanya dari liga yang benar-benar dimainkan.
+    // garis: disambung antar kolom yang punya data, meski ada jarak/gap (mis. pemain
+    // baru gabung belakangan di Liga 4 — tetap disambung dari Liga 0, dashed sepanjang
+    // periode dia belum join). Segmen yang melewati gap ATAU liga yang di-skip/carry
+    // digambar putus-putus (dashed) supaya kelihatan bedanya dari liga yang benar2 dimainkan.
     let prevC = null;
     for(let c=0;c<TOTAL_COLS;c++){
-      if(!hasRank(p,c)){ prevC = null; continue; }
-      if(prevC !== null && c - prevC === 1){
+      if(!hasRank(p,c)) continue;
+      if(prevC !== null){
         const x1 = xForCol(prevC), y1 = yForRank(p[rankAtColKey][prevC]);
         const x2 = xForCol(c),     y2 = yForRank(p[rankAtColKey][c]);
-        const dashed = isCarried(p,c) || isCarried(p,prevC);
+        const dashed = (c - prevC > 1) || isCarried(p,c) || isCarried(p,prevC);
         const cls = 'line-path' + (dashed ? ' dashed' : '');
         g.appendChild(el('path',{d:`M${x1} ${y1} L${x2} ${y2}`, class:cls, stroke:p.color}));
       }
@@ -779,8 +808,8 @@ scorers.forEach((s,idx)=>{
 
 // footer sederhana, contoh: "Data di-update pada Senin, 20 Juli 2026 (14:57 WIB)"
 // tinggal ganti dua baris di bawah ini tiap kali ada update data baru.
-const LAST_UPDATED_DATE = 'Selasa, 11 Agustus 2026';
-const LAST_UPDATED_TIME = '17:53';
+const LAST_UPDATED_DATE = 'Senin, 31 Agustus 2026';
+const LAST_UPDATED_TIME = '16:10';
 document.getElementById('footerInfo').textContent = `Data di-update pada ${LAST_UPDATED_DATE} (${LAST_UPDATED_TIME} WIB)`;
 
 // ---------- SEARCH: cari nama pemain -> highlight grafik & legend
