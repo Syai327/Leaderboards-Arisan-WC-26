@@ -229,7 +229,7 @@
   </div>
 </div>
 
-<footer id="footerInfo">Data di-update pada Senin, 31 Agustus 2026 (16:10 WIB)</footer>
+<footer id="footerInfo">Data di-update pada Kamis, 3 September 2026 (17:13 WIB)</footer>
 <div class="tooltip" id="tooltip"></div>
 
 <script>
@@ -287,6 +287,7 @@ const players = [
       18:{team:'Olympys',      poin:11, gol:27},
       19:{team:'Chelsea',      poin:17, gol:44},
       20:{team:'England',      poin:21, gol:55},
+      22:{team:'Arsenal',      poin:20, gol:18},
   }},
   { name:'Fadhil', color:'#ec5fb0', entries:{
       1:{team:'England',      poin:12, gol:26},
@@ -307,6 +308,7 @@ const players = [
       18:{team:'Aston Villa',  poin:2,  gol:17},
       19:{team:'Tottenham',    poin:18, gol:42},
       20:{team:'Brasil',       poin:11, gol:32},
+      22:{team:'Arsenal',      poin:20, gol:18},
   }},
   { name:'Gilang', color:'#f5b942', entries:{
       1:{team:'France',       poin:10, gol:32},
@@ -326,6 +328,7 @@ const players = [
       16:{team:'Liverpool',   poin:7,  gol:37},
       17:{team:'Liverpool',   poin:7,  gol:40},
       20:{team:'Spain',       poin:7,  gol:37},
+      22:{team:'Barcelona',   poin:30, gol:18},
   }},
   { name:'Ikiw',   color:'#3ec6a8', entries:{
       1:{team:'Argentina',    poin:10, gol:19},
@@ -335,6 +338,7 @@ const players = [
       10:{team:'Spain',       poin:19, gol:39},
       11:{team:'PSG',         poin:13, gol:24},
       15:{team:'PSG',         poin:10, gol:16},
+      22:{team:'PSG',         poin:10, gol:10},
   }},
   { name:'Robi',   color:'#9b7cf0', entries:{
       1:{team:'Germany',      poin:9,  gol:28},
@@ -356,6 +360,7 @@ const players = [
       18:{team:'Como',           poin:13, gol:20},
       19:{team:'Aston Villa',    poin:26, gol:57},
       20:{team:'Argentina',      poin:15, gol:43},
+      22:{team:'Barcelona',      poin:30, gol:18},
   }},
   { name:'Reza',   color:'#38b6d9', entries:{
       1:{team:'Portugal',     poin:4,  gol:15},
@@ -381,6 +386,7 @@ const players = [
       18:{team:'Real Madrid', poin:7,  gol:22},
       19:{team:'Manchester City',poin:12, gol:34},
       20:{team:'France',      poin:4,  gol:25},
+      22:{team:'PSG',         poin:10, gol:10},
   }},
   { name:'Raihan', color:'#f97066', entries:{
       19:{team:'Liverpool',   poin:8,  gol:42},
@@ -808,8 +814,8 @@ scorers.forEach((s,idx)=>{
 
 // footer sederhana, contoh: "Data di-update pada Senin, 20 Juli 2026 (14:57 WIB)"
 // tinggal ganti dua baris di bawah ini tiap kali ada update data baru.
-const LAST_UPDATED_DATE = 'Senin, 31 Agustus 2026';
-const LAST_UPDATED_TIME = '16:10';
+const LAST_UPDATED_DATE = 'Kamis, 3 September 2026';
+const LAST_UPDATED_TIME = '17:13';
 document.getElementById('footerInfo').textContent = `Data di-update pada ${LAST_UPDATED_DATE} (${LAST_UPDATED_TIME} WIB)`;
 
 // ---------- SEARCH: cari nama pemain -> highlight grafik & legend
